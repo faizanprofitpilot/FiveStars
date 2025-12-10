@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { AnimatedSection } from '@/components/landing/AnimatedSection'
@@ -26,9 +27,19 @@ export default function LandingPage() {
       {/* Header */}
       <header className="border-b border-amber-200 bg-amber-50/80 backdrop-blur-sm sticky top-0 z-50 animate-fade-in-down">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between max-w-6xl">
-          <h1 className="text-2xl font-bold text-amber-600">
-            FiveStars
-          </h1>
+          <Link href="/" className="flex items-center gap-3">
+            <Image
+              src="/logo.png"
+              alt="FiveStars"
+              width={140}
+              height={40}
+              className="h-8 w-auto"
+              priority
+            />
+            <h1 className="text-2xl font-bold text-amber-600 pt-0.5">
+              FiveStars
+            </h1>
+          </Link>
           <div className="flex items-center gap-4">
             <Link href="/login">
               <Button variant="ghost" className="text-slate-700 hover:text-slate-900">
@@ -494,7 +505,13 @@ export default function LandingPage() {
         <div className="container mx-auto px-4 py-12 max-w-6xl">
           <div className="flex flex-col md:flex-row justify-between items-center gap-6">
             <div>
-              <h4 className="text-xl font-bold mb-2 text-amber-600">FiveStars</h4>
+              <Image
+                src="/logo.png"
+                alt="FiveStars"
+                width={120}
+                height={35}
+                className="h-7 w-auto mb-2"
+              />
               <p className="text-sm text-slate-700">
                 &copy; {new Date().getFullYear()} FiveStars. All rights reserved.
               </p>

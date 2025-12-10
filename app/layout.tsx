@@ -7,6 +7,13 @@ const inter = Inter({ subsets: ["latin"] })
 export const metadata: Metadata = {
   title: "FiveStars - AI-Powered Review Request Automation",
   description: "Automate review requests and generate AI-powered review replies",
+  icons: {
+    icon: [
+      { url: "/logo.png", sizes: "any" },
+    ],
+    shortcut: "/logo.png",
+    apple: "/logo.png",
+  },
 }
 
 export default function RootLayout({

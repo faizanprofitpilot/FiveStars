@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
@@ -62,8 +63,20 @@ export default function LoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
-          <CardDescription>
+          <div className="flex justify-center mb-4">
+            <Link href="/">
+              <Image
+                src="/logo.png"
+                alt="FiveStars"
+                width={140}
+                height={40}
+                className="h-10 w-auto"
+                priority
+              />
+            </Link>
+          </div>
+          <CardTitle className="text-2xl font-bold text-center">Welcome back</CardTitle>
+          <CardDescription className="text-center">
             Sign in to your FiveStars account
           </CardDescription>
         </CardHeader>

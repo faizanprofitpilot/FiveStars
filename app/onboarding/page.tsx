@@ -1,6 +1,8 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -50,8 +52,20 @@ export default function OnboardingPage() {
     <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold">Welcome to FiveStars</CardTitle>
-          <CardDescription>
+          <div className="flex justify-center mb-4">
+            <Link href="/">
+              <Image
+                src="/logo.png"
+                alt="FiveStars"
+                width={140}
+                height={40}
+                className="h-10 w-auto"
+                priority
+              />
+            </Link>
+          </div>
+          <CardTitle className="text-2xl font-bold text-center">Welcome to FiveStars</CardTitle>
+          <CardDescription className="text-center">
             Let&apos;s set up your business profile
           </CardDescription>
         </CardHeader>

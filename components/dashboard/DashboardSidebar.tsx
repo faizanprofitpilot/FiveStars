@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import {
@@ -25,7 +26,16 @@ export function DashboardSidebar() {
   return (
     <aside className="w-64 bg-amber-50 border-r border-amber-200 flex flex-col">
       <div className="p-6">
-        <h1 className="text-2xl font-bold text-amber-600">FiveStars</h1>
+        <Link href="/dashboard" className="flex items-center">
+          <Image
+            src="/logo.png"
+            alt="FiveStars"
+            width={140}
+            height={40}
+            className="h-8 w-auto"
+            priority
+          />
+        </Link>
       </div>
       <nav className="flex-1 px-3 space-y-1">
         {navigation.map((item) => {
