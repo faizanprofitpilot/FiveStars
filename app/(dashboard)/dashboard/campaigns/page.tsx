@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { CampaignCard } from '@/components/campaigns/CampaignCard'
 import { Plus } from 'lucide-react'
 
 export default async function CampaignsPage() {
@@ -91,21 +92,7 @@ export default async function CampaignsPage() {
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {campaignList.map((campaign) => (
-              <Link key={campaign.id} href={`/dashboard/campaigns/${campaign.id}`}>
-                <Card className="border-amber-200 shadow-sm hover:shadow-md transition-all cursor-pointer hover:border-amber-300">
-                  <CardHeader>
-                    <CardTitle className="text-lg text-slate-900">{campaign.name}</CardTitle>
-                    <CardDescription className="text-slate-600">
-                      Primary: {campaign.primary_channel?.toUpperCase() || 'None'}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-sm text-slate-500 font-mono">
-                      ID: {campaign.campaign_id}
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
+              <CampaignCard key={campaign.id} campaign={campaign} />
             ))}
           </div>
         )}
