@@ -120,15 +120,30 @@ export async function POST(request: Request) {
         body: message,
       })
 
-      if (smsResult.success) {
-        primarySent = true
-        await supabase
-          .from('review_requests')
-          .update({
-            primary_sent: true,
-            sent_at: new Date().toISOString(),
-          })
-          .eq('id', reviewRequest.id)
+      if (smsResult.success && smsResult.messageSid) {
+        // Twilio accepted the message, but status might be "queued" or "sent"
+        // "sent" means accepted by carrier, not necessarily delivered
+        const twilioStatus = smsResult.status || 'unknown'
+        
+        // Only mark as sent if status is "sent", "delivered", or "queued"
+        if (['queued', 'sending', 'sent', 'delivered'].includes(twilioStatus)) {
+          primarySent = true
+          
+          // Store status warning if not delivered
+          await supabase
+            .from('review_requests')
+            .update({
+              primary_sent: true,
+              sent_at: new Date().toISOString(),
+              error_message: twilioStatus === 'delivered' 
+                ? null 
+                : `Twilio status: ${twilioStatus} (may not be delivered yet)`,
+            })
+            .eq('id', reviewRequest.id)
+        } else {
+          // Status is "undelivered" or "failed"
+          errorMessage = `Twilio status: ${twilioStatus}. Message may not have been delivered.`
+        }
       } else {
         errorMessage = smsResult.error || 'Failed to send SMS'
       }

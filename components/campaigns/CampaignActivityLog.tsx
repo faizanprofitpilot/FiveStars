@@ -51,12 +51,24 @@ export function CampaignActivityLog({ campaignId }: CampaignActivityLogProps) {
 
   const getStatusBadge = (request: ReviewRequest) => {
     if (request.primary_sent) {
-      return (
-        <Badge className="bg-green-100 text-green-800 border-green-200">
-          <CheckCircle2 className="h-3 w-3 mr-1" />
-          Sent
-        </Badge>
-      )
+      // Check if error message indicates delivery status
+      const isDelivered = !request.error_message || !request.error_message.includes('Twilio status:')
+      if (isDelivered) {
+        return (
+          <Badge className="bg-green-100 text-green-800 border-green-200">
+            <CheckCircle2 className="h-3 w-3 mr-1" />
+            Accepted
+          </Badge>
+        )
+      } else {
+        // Status is queued/sent but not delivered
+        return (
+          <Badge className="bg-amber-100 text-amber-800 border-amber-200">
+            <Clock className="h-3 w-3 mr-1" />
+            In Progress
+          </Badge>
+        )
+      }
     }
     if (request.error_message) {
       return (
@@ -214,14 +226,25 @@ export function CampaignActivityLog({ campaignId }: CampaignActivityLogProps) {
                 )}
 
                 {request.primary_sent && request.sent_at && (
-                  <div className="mt-3 pt-3 border-t border-green-200 bg-green-50/30 rounded-md p-3">
-                    <div className="flex items-center gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-green-600 flex-shrink-0" />
-                      <div>
-                        <p className="text-xs font-semibold text-green-900 mb-1">Successfully Sent</p>
-                        <p className="text-xs text-green-700">
-                          Message delivered at {new Date(request.sent_at).toLocaleString()}
+                  <div className="mt-3 pt-3 border-t border-amber-200 bg-amber-50/30 rounded-md p-3">
+                    <div className="flex items-start gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-amber-600 flex-shrink-0 mt-0.5" />
+                      <div className="flex-1">
+                        <p className="text-xs font-semibold text-amber-900 mb-1">Message Accepted by Twilio</p>
+                        <p className="text-xs text-amber-700 mb-2">
+                          Accepted at {new Date(request.sent_at).toLocaleString()}
                         </p>
+                        {request.error_message && request.error_message.includes('Twilio status:') && (
+                          <div className="mt-2 pt-2 border-t border-amber-200">
+                            <p className="text-xs text-amber-800 font-medium mb-1">⚠️ Important:</p>
+                            <p className="text-xs text-amber-700">
+                              {request.error_message}
+                            </p>
+                            <p className="text-xs text-amber-600 mt-1 italic">
+                              If you didn&apos;t receive the message, it may still be queued or the carrier may have blocked it.
+                            </p>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>

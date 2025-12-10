@@ -145,19 +145,46 @@ export async function sendReviewRequestInternal({
       console.log('SMS send result:', {
         success: smsResult.success,
         messageSid: smsResult.messageSid,
+        status: smsResult.status,
         error: smsResult.error,
       })
 
-      if (smsResult.success) {
-        primarySent = true
-        await supabase
-          .from('review_requests')
-          .update({
-            primary_sent: true,
-            sent_at: new Date().toISOString(),
-          })
-          .eq('id', reviewRequest.id)
-        console.log('SMS sent successfully, review request updated')
+      if (smsResult.success && smsResult.messageSid) {
+        // Twilio accepted the message, but status might be "queued" or "sent"
+        // "sent" means accepted by carrier, not necessarily delivered
+        // We'll mark as sent but note the actual status
+        const twilioStatus = smsResult.status || 'unknown'
+        
+        console.log('Twilio message status:', twilioStatus)
+        
+        // Only mark as sent if status is "sent", "delivered", or "queued"
+        // "queued" and "sent" mean it's in progress, "delivered" means it arrived
+        if (['queued', 'sending', 'sent', 'delivered'].includes(twilioStatus)) {
+          primarySent = true
+          
+          // Store message SID and status for later checking
+          await supabase
+            .from('review_requests')
+            .update({
+              primary_sent: true,
+              sent_at: new Date().toISOString(),
+              error_message: twilioStatus === 'delivered' 
+                ? null 
+                : `Twilio status: ${twilioStatus} (may not be delivered yet)`,
+            })
+            .eq('id', reviewRequest.id)
+          
+          console.log('SMS accepted by Twilio, status:', twilioStatus)
+          
+          // If status is not "delivered", warn that it may not have arrived yet
+          if (twilioStatus !== 'delivered') {
+            console.warn(`Message status is "${twilioStatus}", not "delivered". Message may not have arrived yet.`)
+          }
+        } else {
+          // Status is "undelivered" or "failed"
+          errorMessage = `Twilio status: ${twilioStatus}. Message may not have been delivered.`
+          console.error('SMS not delivered, status:', twilioStatus)
+        }
       } else {
         errorMessage = smsResult.error || 'Failed to send SMS'
         console.error('SMS send failed:', errorMessage)

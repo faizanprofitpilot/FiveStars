@@ -13,6 +13,7 @@ export interface SendSMSOptions {
 export async function sendSMS({ to, body }: SendSMSOptions): Promise<{
   success: boolean
   messageSid?: string
+  status?: string
   error?: string
 }> {
   try {
@@ -43,9 +44,14 @@ export async function sendSMS({ to, body }: SendSMSOptions): Promise<{
       from: message.from,
     })
 
+    // Note: Twilio status can be: queued, sending, sent, delivered, undelivered, failed
+    // "sent" means accepted by carrier, not necessarily delivered
+    // We need to check status later or use webhooks for actual delivery confirmation
+
     return {
       success: true,
       messageSid: message.sid,
+      status: message.status, // Include status in response
     }
   } catch (error: any) {
     console.error('Twilio SMS error:', {
