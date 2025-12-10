@@ -47,7 +47,10 @@ Guidelines:
 - Address the reviewer's specific points when possible
 - Thank them for their feedback
 - Keep responses appropriate in length based on the tone selected
-- Maintain a positive, helpful tone even when addressing negative feedback`
+- Maintain a positive, helpful tone even when addressing negative feedback
+- NEVER use placeholders like "(reviewer name)", "(customer name)", or any other placeholders
+- Write the complete, final reply text ready to use - do not include any brackets, placeholders, or template variables
+- If the reviewer's name is not provided in the review, do not reference it or use placeholders`
 
     const userPrompt = `Review to respond to:
 "${reviewText}"

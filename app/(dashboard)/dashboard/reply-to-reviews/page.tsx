@@ -157,7 +157,7 @@ export default function ReplyToReviewsPage() {
             <div className="relative">
               <Textarea
                 value={generatedReply}
-                readOnly
+                onChange={(e) => setGeneratedReply(e.target.value)}
                 placeholder="Your generated reply will appear here..."
                 rows={10}
                 className="pr-10"
@@ -180,7 +180,7 @@ export default function ReplyToReviewsPage() {
 
             {generatedReply && (
               <div className="text-sm text-slate-600">
-                <p className="text-slate-700">✓ Reply generated! Click the copy button or select all to copy.</p>
+                <p className="text-slate-700">✓ Reply generated! You can edit it above, then click the copy button or select all to copy.</p>
                 <p className="mt-2 text-slate-600">
                   <strong className="text-slate-900">Note:</strong> You&apos;ll need to manually paste this reply on Google
                   Business, Yelp, Facebook, or your review platform.
