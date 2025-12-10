@@ -182,3 +182,19 @@ function LoginForm() {
   )
 }
 
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
+        <Card className="w-full max-w-md">
+          <CardContent className="p-6 text-center">
+            <p className="text-muted-foreground">Loading...</p>
+          </CardContent>
+        </Card>
+      </div>
+    }>
+      <LoginForm />
+    </Suspense>
+  )
+}
+
