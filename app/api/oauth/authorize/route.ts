@@ -98,9 +98,27 @@ export async function POST(request: Request) {
     const body = await request.json()
     const { approved, client_id, redirect_uri, scope, state } = body
 
+    // Validate required fields
+    if (!client_id || !redirect_uri) {
+      return NextResponse.json(
+        { error: 'invalid_request', error_description: 'Missing required parameters: client_id, redirect_uri' },
+        { status: 400 }
+      )
+    }
+
+    // Validate redirect_uri is a valid URL
+    let redirectUrl: URL
+    try {
+      redirectUrl = new URL(redirect_uri)
+    } catch (e) {
+      return NextResponse.json(
+        { error: 'invalid_request', error_description: 'Invalid redirect_uri' },
+        { status: 400 }
+      )
+    }
+
     if (!approved) {
       // User denied authorization
-      const redirectUrl = new URL(redirect_uri)
       redirectUrl.searchParams.set('error', 'access_denied')
       redirectUrl.searchParams.set('error_description', 'User denied the request')
       if (state) {
@@ -116,7 +134,10 @@ export async function POST(request: Request) {
     } = await supabase.auth.getUser()
 
     if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json(
+        { error: 'unauthorized', error_description: 'User not authenticated' },
+        { status: 401 }
+      )
     }
 
     // Generate authorization code
@@ -139,13 +160,12 @@ export async function POST(request: Request) {
     if (codeError) {
       console.error('Error storing authorization code:', codeError)
       return NextResponse.json(
-        { error: 'server_error', error_description: 'Failed to generate authorization code' },
+        { error: 'server_error', error_description: `Failed to generate authorization code: ${codeError.message}` },
         { status: 500 }
       )
     }
 
     // Redirect back to client with authorization code
-    const redirectUrl = new URL(redirect_uri)
     redirectUrl.searchParams.set('code', code)
     if (state) {
       redirectUrl.searchParams.set('state', state)

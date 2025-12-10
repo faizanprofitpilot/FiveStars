@@ -20,6 +20,11 @@ function OAuthConsentContent() {
   const handleApprove = async () => {
     setLoading(true)
     try {
+      if (!clientId || !redirectUri) {
+        alert('Missing required parameters. Please try again.')
+        return
+      }
+
       const response = await fetch('/api/oauth/authorize', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -30,19 +35,37 @@ function OAuthConsentContent() {
           scope,
           state,
         }),
+        redirect: 'manual', // Don't auto-follow redirects
       })
 
-      if (response.redirected) {
-        window.location.href = response.url
-      } else {
-        const data = await response.json()
-        if (data.error) {
-          alert(`Error: ${data.error_description || data.error}`)
+      // Handle redirect response
+      if (response.status >= 300 && response.status < 400) {
+        const location = response.headers.get('Location')
+        if (location) {
+          window.location.href = location
+          return
         }
       }
-    } catch (error) {
+
+      // Handle error response
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}))
+        const errorMsg = data.error_description || data.error || `Error: ${response.status} ${response.statusText}`
+        alert(errorMsg)
+        console.error('OAuth authorization error:', data)
+        return
+      }
+
+      // If we get here, something unexpected happened
+      const data = await response.json().catch(() => ({}))
+      if (data.error) {
+        alert(`Error: ${data.error_description || data.error}`)
+      } else {
+        alert('An unexpected error occurred. Please try again.')
+      }
+    } catch (error: any) {
       console.error('Error approving OAuth request:', error)
-      alert('An error occurred. Please try again.')
+      alert(`An error occurred: ${error.message || 'Please try again.'}`)
     } finally {
       setLoading(false)
     }
