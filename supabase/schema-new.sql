@@ -78,6 +78,16 @@ CREATE TABLE IF NOT EXISTS review_replies (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW()) NOT NULL
 );
 
+-- API keys table for Zapier and other integrations
+CREATE TABLE IF NOT EXISTS api_keys (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  key_hash TEXT NOT NULL UNIQUE,
+  name TEXT NOT NULL,
+  last_used_at TIMESTAMP WITH TIME ZONE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW()) NOT NULL
+);
+
 -- Drop existing indexes if they exist (will recreate)
 DROP INDEX IF EXISTS idx_businesses_user_id;
 DROP INDEX IF EXISTS idx_campaigns_business_id;
@@ -86,6 +96,8 @@ DROP INDEX IF EXISTS idx_review_requests_campaign_id;
 DROP INDEX IF EXISTS idx_review_requests_sent_at;
 DROP INDEX IF EXISTS idx_review_replies_business_id;
 DROP INDEX IF EXISTS idx_review_replies_created_at;
+DROP INDEX IF EXISTS idx_api_keys_user_id;
+DROP INDEX IF EXISTS idx_api_keys_key_hash;
 
 -- Create indexes for performance
 CREATE INDEX IF NOT EXISTS idx_businesses_user_id ON businesses(user_id);
@@ -95,6 +107,8 @@ CREATE INDEX IF NOT EXISTS idx_review_requests_campaign_id ON review_requests(ca
 CREATE INDEX IF NOT EXISTS idx_review_requests_sent_at ON review_requests(sent_at);
 CREATE INDEX IF NOT EXISTS idx_review_replies_business_id ON review_replies(business_id);
 CREATE INDEX IF NOT EXISTS idx_review_replies_created_at ON review_replies(created_at);
+CREATE INDEX IF NOT EXISTS idx_api_keys_user_id ON api_keys(user_id);
+CREATE INDEX IF NOT EXISTS idx_api_keys_key_hash ON api_keys(key_hash);
 
 -- Row Level Security (RLS) Policies
 
@@ -103,6 +117,7 @@ ALTER TABLE businesses ENABLE ROW LEVEL SECURITY;
 ALTER TABLE campaigns ENABLE ROW LEVEL SECURITY;
 ALTER TABLE review_requests ENABLE ROW LEVEL SECURITY;
 ALTER TABLE review_replies ENABLE ROW LEVEL SECURITY;
+ALTER TABLE api_keys ENABLE ROW LEVEL SECURITY;
 
 -- Businesses policies
 CREATE POLICY "Users can view their own businesses"
@@ -201,6 +216,14 @@ CREATE POLICY "Users can insert review replies for their businesses"
       AND businesses.user_id = auth.uid()
     )
   );
+
+-- API keys policies
+DROP POLICY IF EXISTS "Users can manage their own API keys" ON api_keys;
+CREATE POLICY "Users can manage their own API keys"
+  ON api_keys
+  FOR ALL
+  USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
 
 -- Function to update updated_at timestamp
 CREATE OR REPLACE FUNCTION update_updated_at_column()

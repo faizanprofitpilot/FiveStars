@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { sendReviewRequestInternal } from '@/lib/zapier/send-review-request'
+import { authenticateApiKey, extractApiKey } from '@/lib/api-keys/auth'
 import { z } from 'zod'
 
 const zapierSchema = z.object({
@@ -13,13 +14,21 @@ const zapierSchema = z.object({
 // This endpoint accepts requests from Zapier
 export async function POST(request: Request) {
   try {
-    // Verify webhook secret (optional but recommended)
-    const authHeader = request.headers.get('authorization')
-    const expectedSecret = process.env.ZAPIER_WEBHOOK_SECRET
+    // Authenticate using API key
+    const apiKey = extractApiKey(request)
 
-    if (expectedSecret && authHeader !== `Bearer ${expectedSecret}`) {
+    if (!apiKey) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
+        { error: 'API key required. Use Authorization: Bearer <key> or X-API-Key header' },
+        { status: 401 }
+      )
+    }
+
+    const userId = await authenticateApiKey(apiKey)
+
+    if (!userId) {
+      return NextResponse.json(
+        { error: 'Invalid API key' },
         { status: 401 }
       )
     }

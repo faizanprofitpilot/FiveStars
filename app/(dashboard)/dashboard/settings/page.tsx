@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { ApiKeyManager } from '@/components/settings/ApiKeyManager'
 import { redirect } from 'next/navigation'
 
 export default async function SettingsPage() {
@@ -75,6 +76,8 @@ export default async function SettingsPage() {
           </div>
         </CardContent>
       </Card>
+
+      <ApiKeyManager />
     </div>
   )
 }
