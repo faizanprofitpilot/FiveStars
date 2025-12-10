@@ -42,7 +42,10 @@ export function DashboardSidebar() {
       </div>
       <nav className="flex-1 px-3 space-y-0.5">
         {navigation.map((item) => {
-          const isActive = pathname === item.href || pathname?.startsWith(item.href + '/')
+          // Fix: Only highlight exact match or if pathname starts with href + '/' (not just href)
+          // This prevents /dashboard from matching /dashboard/campaigns
+          const isActive = pathname === item.href || 
+            (item.href !== '/dashboard' && pathname?.startsWith(item.href + '/'))
           return (
             <Link
               key={item.name}
