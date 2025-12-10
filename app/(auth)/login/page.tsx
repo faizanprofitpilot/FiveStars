@@ -1,22 +1,25 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { Suspense } from 'react'
 
-export default function LoginPage() {
+function LoginForm() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
   const supabase = createClient()
+  const searchParams = useSearchParams()
+  const redirectUrl = searchParams?.get('redirect') || '/dashboard'
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -31,7 +34,7 @@ export default function LoginPage() {
 
       if (error) throw error
 
-      router.push('/dashboard')
+      router.push(redirectUrl)
       router.refresh()
     } catch (error: any) {
       setError(error.message || 'An error occurred during login')
@@ -45,10 +48,16 @@ export default function LoginPage() {
     setError(null)
 
     try {
+      // Preserve the redirect URL in the callback
+      const callbackUrl = new URL('/auth/callback', window.location.origin)
+      if (redirectUrl && redirectUrl !== '/dashboard') {
+        callbackUrl.searchParams.set('redirect', redirectUrl)
+      }
+      
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
+          redirectTo: callbackUrl.toString(),
         },
       })
 
