@@ -132,9 +132,12 @@ export async function sendReviewRequestInternal({
       
       console.log('Attempting to send SMS:', {
         to: phone,
+        phone_raw: phone,
         message_length: message.length,
         campaign_id: campaignId,
         review_request_id: reviewRequest.id,
+        twilio_configured: !!(process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_PHONE_NUMBER),
+        twilio_phone: process.env.TWILIO_PHONE_NUMBER || 'NOT SET',
       })
       
       const smsResult = await sendSMS({
@@ -147,6 +150,7 @@ export async function sendReviewRequestInternal({
         messageSid: smsResult.messageSid,
         status: smsResult.status,
         error: smsResult.error,
+        full_result: smsResult,
       })
 
       if (smsResult.success && smsResult.messageSid) {
@@ -187,7 +191,12 @@ export async function sendReviewRequestInternal({
         }
       } else {
         errorMessage = smsResult.error || 'Failed to send SMS'
-        console.error('SMS send failed:', errorMessage)
+        console.error('SMS send failed:', {
+          error: errorMessage,
+          full_result: smsResult,
+          phone: phone,
+          twilio_configured: !!(process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_PHONE_NUMBER),
+        })
       }
       }
     } else if (primaryChannel === 'email') {

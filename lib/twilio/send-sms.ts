@@ -1,9 +1,15 @@
 import twilio from 'twilio'
 
-const client = twilio(
-  process.env.TWILIO_ACCOUNT_SID,
-  process.env.TWILIO_AUTH_TOKEN
-)
+// Initialize Twilio client lazily to avoid errors if env vars aren't set
+function getTwilioClient() {
+  if (!process.env.TWILIO_ACCOUNT_SID || !process.env.TWILIO_AUTH_TOKEN) {
+    throw new Error('Twilio credentials not configured')
+  }
+  return twilio(
+    process.env.TWILIO_ACCOUNT_SID,
+    process.env.TWILIO_AUTH_TOKEN
+  )
+}
 
 export interface SendSMSOptions {
   to: string
@@ -18,22 +24,58 @@ export async function sendSMS({ to, body }: SendSMSOptions): Promise<{
 }> {
   try {
     if (!process.env.TWILIO_ACCOUNT_SID || !process.env.TWILIO_AUTH_TOKEN) {
-      throw new Error('Twilio credentials not configured')
+      const error = 'Twilio credentials not configured'
+      console.error(error, {
+        hasAccountSid: !!process.env.TWILIO_ACCOUNT_SID,
+        hasAuthToken: !!process.env.TWILIO_AUTH_TOKEN,
+      })
+      throw new Error(error)
     }
 
     if (!process.env.TWILIO_PHONE_NUMBER) {
-      throw new Error('Twilio phone number not configured')
+      const error = 'Twilio phone number not configured'
+      console.error(error)
+      throw new Error(error)
     }
 
-    // Validate phone number format (basic validation)
-    const cleanedPhone = to.replace(/\D/g, '')
-    if (cleanedPhone.length < 10) {
-      throw new Error('Invalid phone number format')
+    const client = getTwilioClient()
+
+    // Validate and format phone number
+    // Twilio requires E.164 format: +[country code][number]
+    let formattedTo = to.trim()
+    
+    // If doesn't start with +, try to add it
+    if (!formattedTo.startsWith('+')) {
+      // Remove all non-digits
+      const cleaned = formattedTo.replace(/\D/g, '')
+      
+      // If it's 10 digits (US number), add +1
+      if (cleaned.length === 10) {
+        formattedTo = `+1${cleaned}`
+      } else if (cleaned.length === 11 && cleaned.startsWith('1')) {
+        // Already has country code
+        formattedTo = `+${cleaned}`
+      } else {
+        formattedTo = `+${cleaned}`
+      }
     }
+
+    // Final validation
+    const cleanedPhone = formattedTo.replace(/\D/g, '')
+    if (cleanedPhone.length < 10) {
+      throw new Error(`Invalid phone number format: ${to} (formatted: ${formattedTo})`)
+    }
+
+    console.log('Sending SMS via Twilio:', {
+      original: to,
+      formatted: formattedTo,
+      from: process.env.TWILIO_PHONE_NUMBER,
+      bodyLength: body.length,
+    })
 
     const message = await client.messages.create({
       body,
-      to,
+      to: formattedTo,
       from: process.env.TWILIO_PHONE_NUMBER,
     })
 
