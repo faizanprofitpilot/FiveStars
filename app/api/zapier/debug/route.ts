@@ -44,6 +44,21 @@ export async function GET(request: Request) {
       )
     }
 
+    // Get user's campaigns first
+    const { data: campaigns } = await supabase
+      .from('campaigns')
+      .select('id')
+      .eq('business_id', business.id)
+
+    const campaignIds = campaigns?.map(c => c.id) || []
+
+    if (campaignIds.length === 0) {
+      return NextResponse.json({
+        review_requests: [],
+        count: 0,
+      })
+    }
+
     // Get recent review requests (last 10)
     const { data: reviewRequests, error } = await supabase
       .from('review_requests')
@@ -65,12 +80,7 @@ export async function GET(request: Request) {
           primary_channel
         )
       `)
-      .in('campaign_id', 
-        supabase
-          .from('campaigns')
-          .select('id')
-          .eq('business_id', business.id)
-      )
+      .in('campaign_id', campaignIds)
       .order('created_at', { ascending: false })
       .limit(10)
 

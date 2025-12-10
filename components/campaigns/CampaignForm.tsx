@@ -96,10 +96,10 @@ export function CampaignForm({ campaign }: CampaignFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <Card>
+      <Card className="border-amber-200 shadow-sm">
         <CardHeader>
-          <CardTitle>Campaign Details</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-lg text-slate-900">Campaign Details</CardTitle>
+          <CardDescription className="text-slate-600">
             Give your campaign a name to identify it
           </CardDescription>
         </CardHeader>
@@ -120,10 +120,10 @@ export function CampaignForm({ campaign }: CampaignFormProps) {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="border-amber-200 shadow-sm">
         <CardHeader>
-          <CardTitle>Primary Channel</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-lg text-slate-900">Primary Channel</CardTitle>
+          <CardDescription className="text-slate-600">
             Choose how you want to send review requests initially
           </CardDescription>
         </CardHeader>
@@ -164,10 +164,10 @@ export function CampaignForm({ campaign }: CampaignFormProps) {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="border-amber-200 shadow-sm">
         <CardHeader>
-          <CardTitle>Secondary Channel (Optional)</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-lg text-slate-900">Secondary Channel (Optional)</CardTitle>
+          <CardDescription className="text-slate-600">
             Fallback channel if primary fails or as a follow-up
           </CardDescription>
         </CardHeader>
@@ -192,10 +192,10 @@ export function CampaignForm({ campaign }: CampaignFormProps) {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="border-amber-200 shadow-sm">
         <CardHeader>
-          <CardTitle>Follow-Up Sequence (Optional)</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-lg text-slate-900">Follow-Up Sequence (Optional)</CardTitle>
+          <CardDescription className="text-slate-600">
             Automatically send a follow-up message after a delay
           </CardDescription>
         </CardHeader>
@@ -258,7 +258,11 @@ export function CampaignForm({ campaign }: CampaignFormProps) {
         >
           Cancel
         </Button>
-        <Button type="submit" disabled={loading}>
+        <Button 
+          type="submit" 
+          disabled={loading}
+          className="bg-amber-500 hover:bg-amber-600 text-slate-900 font-semibold"
+        >
           {loading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />

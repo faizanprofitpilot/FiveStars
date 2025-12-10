@@ -1,6 +1,9 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { CampaignForm } from '@/components/campaigns/CampaignForm'
+import Link from 'next/link'
+import { Button } from '@/components/ui/button'
+import { ArrowLeft } from 'lucide-react'
+import { CampaignTabs } from '@/components/campaigns/CampaignTabs'
 
 export default async function CampaignDetailPage({
   params,
@@ -39,18 +42,30 @@ export default async function CampaignDetailPage({
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Header Section */}
-      <div>
-        <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Edit Campaign</h1>
-        <p className="text-slate-600 mt-2 text-sm">
-          Update your campaign settings
-        </p>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Link href="/dashboard/campaigns">
+            <Button variant="ghost" size="icon" className="text-slate-600 hover:text-slate-900">
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+          </Link>
+          <div>
+            <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Campaign Details</h1>
+            <p className="text-slate-600 mt-1 text-sm">
+              Manage your campaign settings and view activity
+            </p>
+          </div>
+        </div>
       </div>
-      <CampaignForm
+
+      {/* Campaign Tabs */}
+      <CampaignTabs
         campaign={{
           id: campaign.id,
           name: campaign.name,
+          campaign_id: campaign.campaign_id,
           primary_channel: campaign.primary_channel,
           secondary_channel: campaign.secondary_channel,
           primary_template: campaign.primary_template,
