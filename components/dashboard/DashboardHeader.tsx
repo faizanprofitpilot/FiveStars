@@ -21,17 +21,17 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
   }
 
   return (
-    <header className="bg-white border-b border-gray-200 px-6 py-4">
+    <header className="bg-white border-b border-amber-200 px-6 py-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
-            <User className="h-5 w-5 text-gray-500" />
-            <span className="text-sm font-medium text-gray-700">
+            <User className="h-5 w-5 text-slate-600" />
+            <span className="text-sm font-medium text-slate-700">
               {user.email}
             </span>
           </div>
         </div>
-        <Button variant="outline" size="sm" onClick={handleSignOut}>
+        <Button variant="outline" size="sm" onClick={handleSignOut} className="border-amber-300 text-slate-700 hover:bg-amber-50">
           <LogOut className="h-4 w-4 mr-2" />
           Sign Out
         </Button>

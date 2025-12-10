@@ -40,7 +40,7 @@ export default async function DashboardLayout({
       <DashboardSidebar />
       <div className="flex-1 flex flex-col">
         <DashboardHeader user={user} />
-        <main className="flex-1 p-6 bg-gray-50">{children}</main>
+        <main className="flex-1 p-6 bg-amber-50/30">{children}</main>
       </div>
     </div>
   )
