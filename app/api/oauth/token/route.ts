@@ -15,13 +15,13 @@ export async function POST(request: Request) {
   try {
     const body = await request.formData() // OAuth uses form-encoded
     const grantType = body.get('grant_type')
-    const clientId = body.get('client_id') || 'zapier'
-    const clientSecret = body.get('client_secret') // Optional for now
+    const clientId = (body.get('client_id') as string) || 'zapier'
+    const clientSecret = body.get('client_secret') as string | null // Optional for now
 
     // Handle authorization code grant
     if (grantType === 'authorization_code') {
-      const code = body.get('code')
-      const redirectUri = body.get('redirect_uri')
+      const code = body.get('code') as string
+      const redirectUri = body.get('redirect_uri') as string
 
       if (!code || !redirectUri) {
         return NextResponse.json(
@@ -97,7 +97,7 @@ export async function POST(request: Request) {
 
     // Handle refresh token grant
     if (grantType === 'refresh_token') {
-      const refreshToken = body.get('refresh_token')
+      const refreshToken = body.get('refresh_token') as string
 
       if (!refreshToken) {
         return NextResponse.json(
