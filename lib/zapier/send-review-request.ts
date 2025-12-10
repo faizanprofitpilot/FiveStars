@@ -171,7 +171,7 @@ export async function sendReviewRequestInternal({
       success: primarySent,
       review_request_id: reviewRequest.id,
       primary_sent: primarySent,
-      error: errorMessage,
+      error: errorMessage || undefined,
     }
   } catch (error: any) {
     console.error('Send review request internal error:', error)
