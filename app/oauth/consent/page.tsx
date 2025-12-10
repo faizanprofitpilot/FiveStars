@@ -49,10 +49,29 @@ function OAuthConsentContent() {
 
       // Handle error response
       if (!response.ok) {
-        const data = await response.json().catch(() => ({}))
+        let data: any = {}
+        try {
+          data = await response.json()
+        } catch (e) {
+          // Response might not be JSON
+          const text = await response.text().catch(() => '')
+          console.error('OAuth authorization error (non-JSON):', {
+            status: response.status,
+            statusText: response.statusText,
+            body: text,
+          })
+          alert(`Error: ${response.status} ${response.statusText}`)
+          return
+        }
         const errorMsg = data.error_description || data.error || `Error: ${response.status} ${response.statusText}`
         alert(errorMsg)
-        console.error('OAuth authorization error:', data)
+        console.error('OAuth authorization error:', {
+          status: response.status,
+          statusText: response.statusText,
+          error: data.error,
+          error_description: data.error_description,
+          fullResponse: data,
+        })
         return
       }
 
@@ -64,7 +83,12 @@ function OAuthConsentContent() {
         alert('An unexpected error occurred. Please try again.')
       }
     } catch (error: any) {
-      console.error('Error approving OAuth request:', error)
+      console.error('Error approving OAuth request:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name,
+        fullError: error,
+      })
       alert(`An error occurred: ${error.message || 'Please try again.'}`)
     } finally {
       setLoading(false)
