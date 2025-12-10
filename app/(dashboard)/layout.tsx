@@ -36,11 +36,18 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen bg-amber-50">
+      {/* Top border */}
+      <div className="fixed top-0 left-0 right-0 h-1 bg-amber-500 z-50" />
+      
       <DashboardSidebar />
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col pt-1">
         <DashboardHeader user={user} />
-        <main className="flex-1 p-6 bg-amber-50/30">{children}</main>
+        <main className="flex-1 bg-white">
+          <div className="max-w-6xl mx-auto px-6 py-8">
+            {children}
+          </div>
+        </main>
       </div>
     </div>
   )

@@ -34,18 +34,19 @@ export default async function IntegrationsPage() {
   const webhookUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://your-domain.com'}/api/zapier/review-request`
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="space-y-8">
+      {/* Header Section */}
       <div>
-        <h1 className="text-3xl font-bold">Integrations</h1>
-        <p className="text-muted-foreground mt-1">
+        <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Integrations</h1>
+        <p className="text-slate-600 mt-2 text-sm">
           Connect FiveStars with your favorite tools via Zapier
         </p>
       </div>
 
-      <Card>
+      <Card className="border-amber-200 shadow-sm">
         <CardHeader>
-          <CardTitle>Zapier Integration</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-xl text-slate-900">Zapier Integration</CardTitle>
+          <CardDescription className="text-slate-600">
             Automate review requests by connecting FiveStars to your CRM, POS, or other tools
           </CardDescription>
         </CardHeader>
@@ -72,11 +73,11 @@ export default async function IntegrationsPage() {
                 {campaigns.map((campaign) => (
                   <div
                     key={campaign.id}
-                    className="flex items-center justify-between p-3 border rounded-lg"
+                    className="flex items-center justify-between p-3 border border-amber-200 rounded-lg hover:bg-amber-50/50 transition-colors"
                   >
                     <div>
-                      <p className="font-medium">{campaign.name}</p>
-                      <p className="text-sm text-muted-foreground font-mono">
+                      <p className="font-medium text-slate-900">{campaign.name}</p>
+                      <p className="text-sm text-slate-500 font-mono">
                         Campaign ID: {campaign.campaign_id}
                       </p>
                     </div>

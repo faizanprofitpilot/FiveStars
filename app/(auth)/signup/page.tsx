@@ -146,15 +146,18 @@ export default function SignupPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <div className="flex justify-center mb-4">
-            <Link href="/">
+            <Link href="/" className="flex items-center gap-3">
               <Image
                 src="/logo.png"
                 alt="FiveStars"
                 width={140}
                 height={40}
-                className="h-10 w-auto"
+                className="h-10 w-auto pt-0.5"
                 priority
               />
+              <h1 className="text-2xl font-bold text-amber-600 pt-0.5">
+                FiveStars
+              </h1>
             </Link>
           </div>
           <CardTitle className="text-2xl font-bold text-center">Create an account</CardTitle>

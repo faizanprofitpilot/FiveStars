@@ -21,20 +21,32 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
   }
 
   return (
-    <header className="bg-white border-b border-amber-200 px-6 py-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <User className="h-5 w-5 text-slate-600" />
-            <span className="text-sm font-medium text-slate-700">
-              {user.email}
-            </span>
+    <header className="bg-white border-b border-amber-200">
+      <div className="max-w-6xl mx-auto px-6 py-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="h-8 w-8 rounded-full bg-amber-100 flex items-center justify-center">
+              <User className="h-4 w-4 text-amber-600" />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-sm font-semibold text-slate-900 leading-none">
+                {user.email?.split('@')[0] || 'User'}
+              </span>
+              <span className="text-xs text-slate-500 leading-none mt-0.5">
+                {user.email}
+              </span>
+            </div>
           </div>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={handleSignOut} 
+            className="text-slate-700 hover:bg-amber-50 hover:text-slate-900"
+          >
+            <LogOut className="h-4 w-4 mr-2" />
+            Sign Out
+          </Button>
         </div>
-        <Button variant="outline" size="sm" onClick={handleSignOut} className="border-amber-300 text-slate-700 hover:bg-amber-50">
-          <LogOut className="h-4 w-4 mr-2" />
-          Sign Out
-        </Button>
       </div>
     </header>
   )

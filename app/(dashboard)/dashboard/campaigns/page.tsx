@@ -53,33 +53,35 @@ export default async function CampaignsPage() {
     }
 
     return (
-      <div className="space-y-6">
+      <div className="space-y-8">
+        {/* Header Section */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold">Campaigns</h1>
-            <p className="text-muted-foreground mt-1">
+            <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Campaigns</h1>
+            <p className="text-slate-600 mt-2 text-sm">
               Manage your review request campaigns
             </p>
           </div>
           <Link href="/dashboard/campaigns/new">
-            <Button>
+            <Button className="bg-amber-500 hover:bg-amber-600 text-slate-900 font-semibold">
               <Plus className="h-4 w-4 mr-2" />
               New Campaign
             </Button>
           </Link>
         </div>
 
+        {/* Campaigns Grid or Empty State */}
         {!campaignList || campaignList.length === 0 ? (
-          <Card>
+          <Card className="border-amber-200 shadow-sm">
             <CardHeader>
-              <CardTitle>No campaigns yet</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-xl text-slate-900">No campaigns yet</CardTitle>
+              <CardDescription className="text-slate-600">
                 Create your first campaign to start automating review requests
               </CardDescription>
             </CardHeader>
             <CardContent>
               <Link href="/dashboard/campaigns/new">
-                <Button>
+                <Button className="bg-amber-500 hover:bg-amber-600 text-slate-900 font-semibold">
                   <Plus className="h-4 w-4 mr-2" />
                   Create Your First Campaign
                 </Button>
@@ -87,19 +89,19 @@ export default async function CampaignsPage() {
             </CardContent>
           </Card>
         ) : (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {campaignList.map((campaign) => (
               <Link key={campaign.id} href={`/dashboard/campaigns/${campaign.id}`}>
-                <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+                <Card className="border-amber-200 shadow-sm hover:shadow-md transition-all cursor-pointer hover:border-amber-300">
                   <CardHeader>
-                    <CardTitle>{campaign.name}</CardTitle>
-                    <CardDescription>
+                    <CardTitle className="text-lg text-slate-900">{campaign.name}</CardTitle>
+                    <CardDescription className="text-slate-600">
                       Primary: {campaign.primary_channel?.toUpperCase() || 'None'}
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-sm text-muted-foreground">
-                      Campaign ID: {campaign.campaign_id}
+                    <div className="text-sm text-slate-500 font-mono">
+                      ID: {campaign.campaign_id}
                     </div>
                   </CardContent>
                 </Card>

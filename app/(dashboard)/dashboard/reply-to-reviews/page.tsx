@@ -72,19 +72,20 @@ export default function ReplyToReviewsPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="space-y-8">
+      {/* Header Section */}
       <div>
-        <h1 className="text-3xl font-bold">Reply to Reviews</h1>
-        <p className="text-muted-foreground mt-1">
+        <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Reply to Reviews</h1>
+        <p className="text-slate-600 mt-2 text-sm">
           Generate AI-powered responses to customer reviews
         </p>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
-        <Card>
+        <Card className="border-amber-200 shadow-sm">
           <CardHeader>
-            <CardTitle>Review</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-lg text-slate-900">Review</CardTitle>
+            <CardDescription className="text-slate-600">
               Paste the customer review you want to respond to
             </CardDescription>
           </CardHeader>
@@ -128,7 +129,11 @@ export default function ReplyToReviewsPage() {
               </div>
             )}
 
-            <Button onClick={handleGenerate} disabled={loading} className="w-full">
+            <Button 
+              onClick={handleGenerate} 
+              disabled={loading} 
+              className="w-full bg-amber-500 hover:bg-amber-600 text-slate-900 font-semibold"
+            >
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -141,10 +146,10 @@ export default function ReplyToReviewsPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-amber-200 shadow-sm">
           <CardHeader>
-            <CardTitle>Generated Reply</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-lg text-slate-900">Generated Reply</CardTitle>
+            <CardDescription className="text-slate-600">
               Copy and paste this reply on your review platform
             </CardDescription>
           </CardHeader>
@@ -174,10 +179,10 @@ export default function ReplyToReviewsPage() {
             </div>
 
             {generatedReply && (
-              <div className="text-sm text-muted-foreground">
-                <p>✓ Reply generated! Click the copy button or select all to copy.</p>
-                <p className="mt-2">
-                  <strong>Note:</strong> You&apos;ll need to manually paste this reply on Google
+              <div className="text-sm text-slate-600">
+                <p className="text-slate-700">✓ Reply generated! Click the copy button or select all to copy.</p>
+                <p className="mt-2 text-slate-600">
+                  <strong className="text-slate-900">Note:</strong> You&apos;ll need to manually paste this reply on Google
                   Business, Yelp, Facebook, or your review platform.
                 </p>
               </div>

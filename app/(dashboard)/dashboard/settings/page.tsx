@@ -19,39 +19,40 @@ export default async function SettingsPage() {
     .single()
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="space-y-8">
+      {/* Header Section */}
       <div>
-        <h1 className="text-3xl font-bold">Settings</h1>
-        <p className="text-muted-foreground mt-1">
+        <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Settings</h1>
+        <p className="text-slate-600 mt-2 text-sm">
           Manage your account and business settings
         </p>
       </div>
 
-      <Card>
+      <Card className="border-amber-200 shadow-sm">
         <CardHeader>
-          <CardTitle>Business Information</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-xl text-slate-900">Business Information</CardTitle>
+          <CardDescription className="text-slate-600">
             Your business profile details
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <label className="text-sm font-medium">Business Name</label>
-            <p className="text-sm text-muted-foreground mt-1">
+            <label className="text-sm font-semibold text-slate-900">Business Name</label>
+            <p className="text-sm text-slate-600 mt-1">
               {business?.business_name || 'Not set'}
             </p>
           </div>
           {business?.google_profile_url && (
             <div>
-              <label className="text-sm font-medium">Google Business Profile</label>
-              <p className="text-sm text-muted-foreground mt-1">
+              <label className="text-sm font-semibold text-slate-900">Google Business Profile</label>
+              <p className="text-sm text-slate-600 mt-1">
                 <a
                   href={business.google_profile_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-primary hover:underline"
+                  className="text-amber-600 hover:text-amber-700 hover:underline font-medium"
                 >
-                  View Profile
+                  View Profile →
                 </a>
               </p>
             </div>
@@ -59,17 +60,17 @@ export default async function SettingsPage() {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="border-amber-200 shadow-sm">
         <CardHeader>
-          <CardTitle>Account</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-xl text-slate-900">Account</CardTitle>
+          <CardDescription className="text-slate-600">
             Your account information
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div>
-            <label className="text-sm font-medium">Email</label>
-            <p className="text-sm text-muted-foreground mt-1">
+            <label className="text-sm font-semibold text-slate-900">Email</label>
+            <p className="text-sm text-slate-600 mt-1">
               {user.email}
             </p>
           </div>
