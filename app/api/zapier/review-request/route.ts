@@ -62,9 +62,41 @@ export async function POST(request: Request) {
       email: validatedData.email,
     })
 
+    // Log detailed result for debugging
+    console.log('Zapier review request result:', {
+      success: result.success,
+      primary_sent: result.primary_sent,
+      error: result.error,
+      review_request_id: result.review_request_id,
+      phone_provided: !!validatedData.phone,
+      email_provided: !!validatedData.email,
+    })
+
     if (!result.success) {
       return NextResponse.json(
-        { error: result.error || 'Failed to send review request' },
+        { 
+          success: false,
+          error: result.error || 'Failed to send review request',
+          primary_sent: result.primary_sent || false,
+          review_request_id: result.review_request_id,
+        },
+        { status: 500 }
+      )
+    }
+
+    // Even if result.success is true, check if primary_sent is false
+    if (!result.primary_sent) {
+      console.warn('Review request created but primary channel not sent:', {
+        review_request_id: result.review_request_id,
+        error: result.error,
+      })
+      return NextResponse.json(
+        {
+          success: false,
+          error: result.error || 'Review request created but message not sent',
+          primary_sent: false,
+          review_request_id: result.review_request_id,
+        },
         { status: 500 }
       )
     }

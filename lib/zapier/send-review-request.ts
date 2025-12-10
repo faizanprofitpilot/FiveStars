@@ -51,10 +51,24 @@ export async function sendReviewRequestInternal({
 
     // Validate contact info based on primary channel
     const primaryChannel = campaign.primary_channel
+    
+    console.log('Campaign channel configuration:', {
+      primary_channel: primaryChannel,
+      phone_provided: !!phone,
+      email_provided: !!email,
+      phone_valid: phone ? validatePhoneNumber(phone) : false,
+    })
+    
     if (
       primaryChannel === 'sms' &&
       (!phone || !validatePhoneNumber(phone))
     ) {
+      console.error('SMS validation failed:', {
+        primary_channel: primaryChannel,
+        phone_provided: !!phone,
+        phone_value: phone,
+        phone_valid: phone ? validatePhoneNumber(phone) : false,
+      })
       return {
         success: false,
         error: 'Valid phone number required for SMS',
@@ -106,14 +120,32 @@ export async function sendReviewRequestInternal({
     let errorMessage: string | null = null
 
     // Send primary channel
-    if (primaryChannel === 'sms' && phone) {
+    if (primaryChannel === 'sms') {
+      if (!phone) {
+        errorMessage = 'Phone number is required for SMS campaigns but was not provided'
+        console.error('SMS campaign but no phone provided')
+      } else {
       const message = replaceTemplateVariables(
         campaign.primary_template,
         templateVariables
       )
+      
+      console.log('Attempting to send SMS:', {
+        to: phone,
+        message_length: message.length,
+        campaign_id: campaignId,
+        review_request_id: reviewRequest.id,
+      })
+      
       const smsResult = await sendSMS({
         to: phone,
         body: message,
+      })
+
+      console.log('SMS send result:', {
+        success: smsResult.success,
+        messageSid: smsResult.messageSid,
+        error: smsResult.error,
       })
 
       if (smsResult.success) {
@@ -125,10 +157,17 @@ export async function sendReviewRequestInternal({
             sent_at: new Date().toISOString(),
           })
           .eq('id', reviewRequest.id)
+        console.log('SMS sent successfully, review request updated')
       } else {
         errorMessage = smsResult.error || 'Failed to send SMS'
+        console.error('SMS send failed:', errorMessage)
       }
-    } else if (primaryChannel === 'email' && email) {
+      }
+    } else if (primaryChannel === 'email') {
+      if (!email) {
+        errorMessage = 'Email is required for email campaigns but was not provided'
+        console.error('Email campaign but no email provided')
+      } else {
       const emailBody = replaceTemplateVariables(
         campaign.primary_template,
         templateVariables
@@ -157,6 +196,10 @@ export async function sendReviewRequestInternal({
       } else {
         errorMessage = emailResult.error || 'Failed to send email'
       }
+      }
+    } else if (primaryChannel === 'none') {
+      errorMessage = 'Campaign primary channel is set to "none". No message will be sent.'
+      console.warn('Campaign has no primary channel configured')
     }
 
     // Update error message if primary failed

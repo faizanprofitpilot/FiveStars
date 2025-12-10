@@ -36,12 +36,26 @@ export async function sendSMS({ to, body }: SendSMSOptions): Promise<{
       from: process.env.TWILIO_PHONE_NUMBER,
     })
 
+    console.log('Twilio message created successfully:', {
+      sid: message.sid,
+      status: message.status,
+      to: message.to,
+      from: message.from,
+    })
+
     return {
       success: true,
       messageSid: message.sid,
     }
   } catch (error: any) {
-    console.error('Twilio SMS error:', error)
+    console.error('Twilio SMS error:', {
+      message: error.message,
+      code: error.code,
+      status: error.status,
+      moreInfo: error.moreInfo,
+      to,
+      from: process.env.TWILIO_PHONE_NUMBER,
+    })
     return {
       success: false,
       error: error.message || 'Failed to send SMS',
