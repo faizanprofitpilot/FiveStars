@@ -65,6 +65,26 @@ export default function LandingPage() {
               FiveStars
             </h1>
           </Link>
+          <nav className="hidden md:flex items-center gap-6">
+            <Link
+              href="#features"
+              className="text-sm font-medium text-slate-700 hover:text-amber-600 transition-colors"
+            >
+              Features
+            </Link>
+            <Link
+              href="#how-it-works"
+              className="text-sm font-medium text-slate-700 hover:text-amber-600 transition-colors"
+            >
+              How It Works
+            </Link>
+            <Link
+              href="#pricing"
+              className="text-sm font-medium text-slate-700 hover:text-amber-600 transition-colors"
+            >
+              Pricing
+            </Link>
+          </nav>
           <div className="flex items-center gap-4">
             {loading ? (
               // Show nothing while loading to avoid flash
@@ -184,7 +204,7 @@ export default function LandingPage() {
       </AnimatedSection>
 
       {/* Features Section */}
-      <section className="container mx-auto px-4 py-24 max-w-6xl bg-amber-50">
+      <section id="features" className="container mx-auto px-4 py-24 max-w-6xl bg-amber-50 scroll-mt-20">
         <AnimatedSection animation="fade-in-up" delay={0}>
           <div className="text-center mb-16">
             <h3 className="text-4xl md:text-5xl font-bold mb-4 text-slate-900">
@@ -296,7 +316,7 @@ export default function LandingPage() {
       </section>
 
       {/* How It Works Section */}
-      <section className="bg-white py-24">
+      <section id="how-it-works" className="bg-white py-24 scroll-mt-20">
         <div className="container mx-auto px-4 max-w-6xl">
           <AnimatedSection animation="fade-in-up" delay={0}>
             <div className="text-center mb-16">
@@ -447,7 +467,7 @@ export default function LandingPage() {
       </section>
 
       {/* Pricing Section */}
-      <section className="bg-white py-24">
+      <section id="pricing" className="bg-white py-24 scroll-mt-20">
         <div className="container mx-auto px-4 max-w-6xl">
           <AnimatedSection animation="fade-in-up" delay={0}>
             <div className="text-center mb-16">
