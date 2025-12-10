@@ -1,0 +1,151 @@
+import { NextResponse } from 'next/server'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { createOAuthTokens, refreshAccessToken } from '@/lib/oauth/auth'
+import { isTokenExpired } from '@/lib/oauth/tokens'
+
+/**
+ * OAuth 2.0 Token Endpoint
+ * POST /api/oauth/token
+ * 
+ * Handles:
+ * - Authorization code grant (code -> access_token)
+ * - Refresh token grant (refresh_token -> new access_token)
+ */
+export async function POST(request: Request) {
+  try {
+    const body = await request.formData() // OAuth uses form-encoded
+    const grantType = body.get('grant_type')
+    const clientId = body.get('client_id') || 'zapier'
+    const clientSecret = body.get('client_secret') // Optional for now
+
+    // Handle authorization code grant
+    if (grantType === 'authorization_code') {
+      const code = body.get('code')
+      const redirectUri = body.get('redirect_uri')
+
+      if (!code || !redirectUri) {
+        return NextResponse.json(
+          {
+            error: 'invalid_request',
+            error_description: 'Missing required parameters: code, redirect_uri',
+          },
+          { status: 400 }
+        )
+      }
+
+      const supabase = createAdminClient()
+
+      // Find and validate authorization code
+      const { data: authCode, error: codeError } = await supabase
+        .from('oauth_authorization_codes')
+        .select('*')
+        .eq('code', code)
+        .eq('redirect_uri', redirectUri)
+        .eq('client_id', clientId)
+        .single()
+
+      if (codeError || !authCode) {
+        return NextResponse.json(
+          {
+            error: 'invalid_grant',
+            error_description: 'Invalid or expired authorization code',
+          },
+          { status: 400 }
+        )
+      }
+
+      // Check if code is expired
+      if (isTokenExpired(authCode.expires_at)) {
+        // Delete expired code
+        await supabase
+          .from('oauth_authorization_codes')
+          .delete()
+          .eq('code', code)
+
+        return NextResponse.json(
+          {
+            error: 'invalid_grant',
+            error_description: 'Authorization code has expired',
+          },
+          { status: 400 }
+        )
+      }
+
+      // Create access and refresh tokens
+      const { accessToken, refreshToken, expiresAt } = await createOAuthTokens(
+        authCode.user_id,
+        clientId,
+        authCode.scope || 'read write',
+        3600 // 1 hour
+      )
+
+      // Delete the authorization code (single use)
+      await supabase
+        .from('oauth_authorization_codes')
+        .delete()
+        .eq('code', code)
+
+      // Return tokens
+      return NextResponse.json({
+        access_token: accessToken,
+        token_type: 'Bearer',
+        expires_in: 3600,
+        refresh_token: refreshToken,
+        scope: authCode.scope || 'read write',
+      })
+    }
+
+    // Handle refresh token grant
+    if (grantType === 'refresh_token') {
+      const refreshToken = body.get('refresh_token')
+
+      if (!refreshToken) {
+        return NextResponse.json(
+          {
+            error: 'invalid_request',
+            error_description: 'Missing required parameter: refresh_token',
+          },
+          { status: 400 }
+        )
+      }
+
+      const result = await refreshAccessToken(refreshToken as string)
+
+      if (!result) {
+        return NextResponse.json(
+          {
+            error: 'invalid_grant',
+            error_description: 'Invalid or expired refresh token',
+          },
+          { status: 400 }
+        )
+      }
+
+      return NextResponse.json({
+        access_token: result.accessToken,
+        token_type: 'Bearer',
+        expires_in: 3600,
+        scope: 'read write',
+      })
+    }
+
+    // Unsupported grant type
+    return NextResponse.json(
+      {
+        error: 'unsupported_grant_type',
+        error_description: `Grant type "${grantType}" is not supported`,
+      },
+      { status: 400 }
+    )
+  } catch (error: any) {
+    console.error('OAuth token endpoint error:', error)
+    return NextResponse.json(
+      {
+        error: 'server_error',
+        error_description: error.message || 'Internal server error',
+      },
+      { status: 500 }
+    )
+  }
+}
+

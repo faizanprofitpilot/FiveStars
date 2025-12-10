@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { sendReviewRequestInternal } from '@/lib/zapier/send-review-request'
-import { authenticateApiKey, extractApiKey } from '@/lib/api-keys/auth'
+import { authenticateOAuthToken, extractOAuthToken } from '@/lib/oauth/auth'
 import { z } from 'zod'
 
 const zapierSchema = z.object({
@@ -14,21 +14,21 @@ const zapierSchema = z.object({
 // This endpoint accepts requests from Zapier
 export async function POST(request: Request) {
   try {
-    // Authenticate using API key
-    const apiKey = extractApiKey(request)
+    // Authenticate using OAuth token
+    const oauthToken = extractOAuthToken(request)
 
-    if (!apiKey) {
+    if (!oauthToken) {
       return NextResponse.json(
-        { error: 'API key required. Use Authorization: Bearer <key> or X-API-Key header' },
+        { error: 'OAuth token required. Use Authorization: Bearer <token>' },
         { status: 401 }
       )
     }
 
-    const userId = await authenticateApiKey(apiKey)
+    const userId = await authenticateOAuthToken(oauthToken)
 
     if (!userId) {
       return NextResponse.json(
-        { error: 'Invalid API key' },
+        { error: 'Invalid or expired OAuth token' },
         { status: 401 }
       )
     }

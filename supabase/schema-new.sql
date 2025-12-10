@@ -78,13 +78,28 @@ CREATE TABLE IF NOT EXISTS review_replies (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW()) NOT NULL
 );
 
--- API keys table for Zapier and other integrations
-CREATE TABLE IF NOT EXISTS api_keys (
+-- OAuth tokens table for Zapier and other OAuth integrations
+CREATE TABLE IF NOT EXISTS oauth_tokens (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  key_hash TEXT NOT NULL UNIQUE,
-  name TEXT NOT NULL,
-  last_used_at TIMESTAMP WITH TIME ZONE,
+  access_token TEXT NOT NULL UNIQUE,
+  refresh_token TEXT UNIQUE,
+  token_type TEXT DEFAULT 'Bearer',
+  expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+  scope TEXT,
+  client_id TEXT, -- For tracking which app (e.g., 'zapier')
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW()) NOT NULL
+);
+
+-- OAuth authorization codes (temporary, deleted after use)
+CREATE TABLE IF NOT EXISTS oauth_authorization_codes (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  code TEXT NOT NULL UNIQUE,
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  client_id TEXT NOT NULL,
+  redirect_uri TEXT NOT NULL,
+  scope TEXT,
+  expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW()) NOT NULL
 );
 
@@ -96,8 +111,11 @@ DROP INDEX IF EXISTS idx_review_requests_campaign_id;
 DROP INDEX IF EXISTS idx_review_requests_sent_at;
 DROP INDEX IF EXISTS idx_review_replies_business_id;
 DROP INDEX IF EXISTS idx_review_replies_created_at;
-DROP INDEX IF EXISTS idx_api_keys_user_id;
-DROP INDEX IF EXISTS idx_api_keys_key_hash;
+DROP INDEX IF EXISTS idx_oauth_tokens_user_id;
+DROP INDEX IF EXISTS idx_oauth_tokens_access_token;
+DROP INDEX IF EXISTS idx_oauth_tokens_refresh_token;
+DROP INDEX IF EXISTS idx_oauth_authorization_codes_code;
+DROP INDEX IF EXISTS idx_oauth_authorization_codes_user_id;
 
 -- Create indexes for performance
 CREATE INDEX IF NOT EXISTS idx_businesses_user_id ON businesses(user_id);
@@ -107,8 +125,11 @@ CREATE INDEX IF NOT EXISTS idx_review_requests_campaign_id ON review_requests(ca
 CREATE INDEX IF NOT EXISTS idx_review_requests_sent_at ON review_requests(sent_at);
 CREATE INDEX IF NOT EXISTS idx_review_replies_business_id ON review_replies(business_id);
 CREATE INDEX IF NOT EXISTS idx_review_replies_created_at ON review_replies(created_at);
-CREATE INDEX IF NOT EXISTS idx_api_keys_user_id ON api_keys(user_id);
-CREATE INDEX IF NOT EXISTS idx_api_keys_key_hash ON api_keys(key_hash);
+CREATE INDEX IF NOT EXISTS idx_oauth_tokens_user_id ON oauth_tokens(user_id);
+CREATE INDEX IF NOT EXISTS idx_oauth_tokens_access_token ON oauth_tokens(access_token);
+CREATE INDEX IF NOT EXISTS idx_oauth_tokens_refresh_token ON oauth_tokens(refresh_token);
+CREATE INDEX IF NOT EXISTS idx_oauth_authorization_codes_code ON oauth_authorization_codes(code);
+CREATE INDEX IF NOT EXISTS idx_oauth_authorization_codes_user_id ON oauth_authorization_codes(user_id);
 
 -- Row Level Security (RLS) Policies
 
@@ -117,7 +138,8 @@ ALTER TABLE businesses ENABLE ROW LEVEL SECURITY;
 ALTER TABLE campaigns ENABLE ROW LEVEL SECURITY;
 ALTER TABLE review_requests ENABLE ROW LEVEL SECURITY;
 ALTER TABLE review_replies ENABLE ROW LEVEL SECURITY;
-ALTER TABLE api_keys ENABLE ROW LEVEL SECURITY;
+ALTER TABLE oauth_tokens ENABLE ROW LEVEL SECURITY;
+ALTER TABLE oauth_authorization_codes ENABLE ROW LEVEL SECURITY;
 
 -- Businesses policies
 CREATE POLICY "Users can view their own businesses"
@@ -217,10 +239,18 @@ CREATE POLICY "Users can insert review replies for their businesses"
     )
   );
 
--- API keys policies
-DROP POLICY IF EXISTS "Users can manage their own API keys" ON api_keys;
-CREATE POLICY "Users can manage their own API keys"
-  ON api_keys
+-- OAuth tokens policies
+DROP POLICY IF EXISTS "Users can manage their own OAuth tokens" ON oauth_tokens;
+CREATE POLICY "Users can manage their own OAuth tokens"
+  ON oauth_tokens
+  FOR ALL
+  USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
+
+-- OAuth authorization codes policies
+DROP POLICY IF EXISTS "Users can manage their own authorization codes" ON oauth_authorization_codes;
+CREATE POLICY "Users can manage their own authorization codes"
+  ON oauth_authorization_codes
   FOR ALL
   USING (auth.uid() = user_id)
   WITH CHECK (auth.uid() = user_id);
