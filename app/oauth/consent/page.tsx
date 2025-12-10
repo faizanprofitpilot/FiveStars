@@ -38,71 +38,39 @@ function OAuthConsentContent() {
         redirect: 'manual', // Don't auto-follow redirects
       })
 
-      console.log('OAuth authorize response:', {
-        status: response.status,
-        statusText: response.statusText,
-        ok: response.ok,
-        redirected: response.redirected,
-        type: response.type,
-        headers: Object.fromEntries(response.headers.entries()),
-      })
+      // Parse JSON response
+      let data: any = {}
+      try {
+        data = await response.json()
+      } catch (e) {
+        const text = await response.text().catch(() => '')
+        console.error('Failed to parse response:', {
+          status: response.status,
+          statusText: response.statusText,
+          body: text.substring(0, 500),
+        })
+        alert(`Error: ${response.status} ${response.statusText}. Please try again.`)
+        return
+      }
 
-      // Handle redirect response (3xx status codes)
-      if (response.status >= 300 && response.status < 400) {
-        const location = response.headers.get('Location')
-        console.log('Redirect detected, Location header:', location)
-        if (location) {
-          window.location.href = location
-          return
-        } else {
-          console.error('Redirect response but no Location header!')
-          alert('Redirect error: No redirect location found. Please try again.')
-          return
-        }
+      // Handle redirect response
+      if (data.redirect && data.redirect_url) {
+        console.log('Redirecting to:', data.redirect_url)
+        window.location.href = data.redirect_url
+        return
       }
 
       // Handle error response
-      if (!response.ok) {
-        const contentType = response.headers.get('content-type')
-        console.log('Error response, content-type:', contentType)
-        
-        let data: any = {}
-        if (contentType && contentType.includes('application/json')) {
-          try {
-            data = await response.json()
-          } catch (e) {
-            console.error('Failed to parse JSON error response:', e)
-          }
-        } else {
-          // Response might not be JSON
-          const text = await response.text().catch(() => '')
-          console.error('OAuth authorization error (non-JSON):', {
-            status: response.status,
-            statusText: response.statusText,
-            contentType,
-            body: text.substring(0, 500), // First 500 chars
-          })
-        }
-        
+      if (!response.ok || data.error) {
         const errorMsg = data.error_description || data.error || `Error: ${response.status} ${response.statusText}`
         alert(errorMsg)
-        console.error('OAuth authorization error:', {
-          status: response.status,
-          statusText: response.statusText,
-          error: data.error,
-          error_description: data.error_description,
-          fullResponse: data,
-        })
+        console.error('OAuth authorization error:', JSON.stringify(data, null, 2))
         return
       }
 
       // If we get here, something unexpected happened
-      const data = await response.json().catch(() => ({}))
-      if (data.error) {
-        alert(`Error: ${data.error_description || data.error}`)
-      } else {
-        alert('An unexpected error occurred. Please try again.')
-      }
+      alert('An unexpected error occurred. Please try again.')
+      console.error('Unexpected response:', JSON.stringify(data, null, 2))
     } catch (error: any) {
       console.error('Error approving OAuth request:', {
         message: error.message,

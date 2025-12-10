@@ -124,7 +124,11 @@ export async function POST(request: Request) {
       if (state) {
         redirectUrl.searchParams.set('state', state)
       }
-      return NextResponse.redirect(redirectUrl.toString())
+      // Return JSON with redirect URL instead of HTTP redirect (for fetch API compatibility)
+      return NextResponse.json({
+        redirect: true,
+        redirect_url: redirectUrl.toString(),
+      })
     }
 
     // User approved - get authenticated user
@@ -171,7 +175,11 @@ export async function POST(request: Request) {
       redirectUrl.searchParams.set('state', state)
     }
 
-    return NextResponse.redirect(redirectUrl.toString())
+    // Return JSON with redirect URL instead of HTTP redirect (for fetch API compatibility)
+    return NextResponse.json({
+      redirect: true,
+      redirect_url: redirectUrl.toString(),
+    })
   } catch (error: any) {
     console.error('OAuth authorize POST error:', error)
     return NextResponse.json(
