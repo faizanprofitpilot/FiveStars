@@ -38,31 +38,52 @@ function OAuthConsentContent() {
         redirect: 'manual', // Don't auto-follow redirects
       })
 
-      // Handle redirect response
+      console.log('OAuth authorize response:', {
+        status: response.status,
+        statusText: response.statusText,
+        ok: response.ok,
+        redirected: response.redirected,
+        type: response.type,
+        headers: Object.fromEntries(response.headers.entries()),
+      })
+
+      // Handle redirect response (3xx status codes)
       if (response.status >= 300 && response.status < 400) {
         const location = response.headers.get('Location')
+        console.log('Redirect detected, Location header:', location)
         if (location) {
           window.location.href = location
+          return
+        } else {
+          console.error('Redirect response but no Location header!')
+          alert('Redirect error: No redirect location found. Please try again.')
           return
         }
       }
 
       // Handle error response
       if (!response.ok) {
+        const contentType = response.headers.get('content-type')
+        console.log('Error response, content-type:', contentType)
+        
         let data: any = {}
-        try {
-          data = await response.json()
-        } catch (e) {
+        if (contentType && contentType.includes('application/json')) {
+          try {
+            data = await response.json()
+          } catch (e) {
+            console.error('Failed to parse JSON error response:', e)
+          }
+        } else {
           // Response might not be JSON
           const text = await response.text().catch(() => '')
           console.error('OAuth authorization error (non-JSON):', {
             status: response.status,
             statusText: response.statusText,
-            body: text,
+            contentType,
+            body: text.substring(0, 500), // First 500 chars
           })
-          alert(`Error: ${response.status} ${response.statusText}`)
-          return
         }
+        
         const errorMsg = data.error_description || data.error || `Error: ${response.status} ${response.statusText}`
         alert(errorMsg)
         console.error('OAuth authorization error:', {
