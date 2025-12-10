@@ -1,10 +1,13 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { AnimatedSection } from '@/components/landing/AnimatedSection'
+import { createClient } from '@/lib/supabase/client'
+import type { User } from '@supabase/supabase-js'
 import {
   Send,
   Zap,
@@ -22,6 +25,28 @@ import {
 } from 'lucide-react'
 
 export default function LandingPage() {
+  const [user, setUser] = useState<User | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const supabase = createClient()
+    
+    // Check current session
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setUser(user)
+      setLoading(false)
+    })
+
+    // Listen for auth changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null)
+    })
+
+    return () => subscription.unsubscribe()
+  }, [])
+
   return (
     <div className="flex min-h-screen flex-col bg-amber-50">
       {/* Header */}
@@ -41,16 +66,29 @@ export default function LandingPage() {
             </h1>
           </Link>
           <div className="flex items-center gap-4">
-            <Link href="/login">
-              <Button variant="ghost" className="text-slate-700 hover:text-slate-900">
-                Sign In
-              </Button>
-            </Link>
-            <Link href="/signup">
-              <Button className="bg-amber-500 hover:bg-amber-600 text-slate-900 font-semibold">
-                Get Started
-              </Button>
-            </Link>
+            {loading ? (
+              // Show nothing while loading to avoid flash
+              <div className="w-32 h-10" />
+            ) : user ? (
+              <Link href="/dashboard">
+                <Button className="bg-amber-500 hover:bg-amber-600 text-slate-900 font-semibold">
+                  Go to Dashboard
+                </Button>
+              </Link>
+            ) : (
+              <>
+                <Link href="/login">
+                  <Button variant="ghost" className="text-slate-700 hover:text-slate-900">
+                    Sign In
+                  </Button>
+                </Link>
+                <Link href="/signup">
+                  <Button className="bg-amber-500 hover:bg-amber-600 text-slate-900 font-semibold">
+                    Get Started
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </header>
@@ -69,21 +107,31 @@ export default function LandingPage() {
               in your brand&apos;s tone.
             </p>
             <div className="flex gap-4 justify-center flex-wrap">
-              <Link href="/signup">
-                <Button size="lg" className="bg-amber-500 hover:bg-amber-600 text-slate-900 font-semibold px-8 py-6 text-lg shadow-lg shadow-amber-500/30 hover:scale-105 transition-transform">
-                  Start Free Trial
-                </Button>
-              </Link>
-              <Link href="#demo">
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="border-2 border-slate-900 text-slate-900 hover:bg-slate-900 hover:text-amber-50 px-8 py-6 text-lg font-semibold hover:scale-105 transition-transform"
-                >
-                  <Play className="mr-2 h-5 w-5" />
-                  Watch Demo
-                </Button>
-              </Link>
+              {user ? (
+                <Link href="/dashboard">
+                  <Button size="lg" className="bg-amber-500 hover:bg-amber-600 text-slate-900 font-semibold px-8 py-6 text-lg shadow-lg shadow-amber-500/30 hover:scale-105 transition-transform">
+                    Go to Dashboard
+                  </Button>
+                </Link>
+              ) : (
+                <>
+                  <Link href="/signup">
+                    <Button size="lg" className="bg-amber-500 hover:bg-amber-600 text-slate-900 font-semibold px-8 py-6 text-lg shadow-lg shadow-amber-500/30 hover:scale-105 transition-transform">
+                      Start Free Trial
+                    </Button>
+                  </Link>
+                  <Link href="#demo">
+                    <Button
+                      size="lg"
+                      variant="outline"
+                      className="border-2 border-slate-900 text-slate-900 hover:bg-slate-900 hover:text-amber-50 px-8 py-6 text-lg font-semibold hover:scale-105 transition-transform"
+                    >
+                      <Play className="mr-2 h-5 w-5" />
+                      Watch Demo
+                    </Button>
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </AnimatedSection>
@@ -456,14 +504,25 @@ export default function LandingPage() {
                       <span className="text-slate-700">Priority support</span>
                     </li>
                   </ul>
-                  <Link href="/signup" className="block">
-                    <Button
-                      size="lg"
-                      className="w-full bg-amber-500 hover:bg-amber-600 text-slate-900 py-6 text-lg font-semibold shadow-lg shadow-amber-500/30 hover:scale-105 transition-transform"
-                    >
-                      Start Free Trial
-                    </Button>
-                  </Link>
+                  {user ? (
+                    <Link href="/dashboard" className="block">
+                      <Button
+                        size="lg"
+                        className="w-full bg-amber-500 hover:bg-amber-600 text-slate-900 py-6 text-lg font-semibold shadow-lg shadow-amber-500/30 hover:scale-105 transition-transform"
+                      >
+                        Go to Dashboard
+                      </Button>
+                    </Link>
+                  ) : (
+                    <Link href="/signup" className="block">
+                      <Button
+                        size="lg"
+                        className="w-full bg-amber-500 hover:bg-amber-600 text-slate-900 py-6 text-lg font-semibold shadow-lg shadow-amber-500/30 hover:scale-105 transition-transform"
+                      >
+                        Start Free Trial
+                      </Button>
+                    </Link>
+                  )}
                   <p className="text-center text-sm text-slate-600">
                     No credit card required. Cancel anytime.
                   </p>
@@ -487,14 +546,25 @@ export default function LandingPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="text-center">
-              <Link href="/signup">
-                <Button
-                  size="lg"
-                  className="bg-amber-500 hover:bg-amber-600 text-slate-900 px-10 py-6 text-lg font-semibold shadow-lg shadow-amber-500/30 hover:scale-105 transition-transform"
-                >
-                  Create Your Free Account
-                </Button>
-              </Link>
+              {user ? (
+                <Link href="/dashboard">
+                  <Button
+                    size="lg"
+                    className="bg-amber-500 hover:bg-amber-600 text-slate-900 px-10 py-6 text-lg font-semibold shadow-lg shadow-amber-500/30 hover:scale-105 transition-transform"
+                  >
+                    Go to Dashboard
+                  </Button>
+                </Link>
+              ) : (
+                <Link href="/signup">
+                  <Button
+                    size="lg"
+                    className="bg-amber-500 hover:bg-amber-600 text-slate-900 px-10 py-6 text-lg font-semibold shadow-lg shadow-amber-500/30 hover:scale-105 transition-transform"
+                  >
+                    Create Your Free Account
+                  </Button>
+                </Link>
+              )}
             </CardContent>
           </Card>
         </AnimatedSection>
