@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
 import { generateAuthorizationCode, getTokenExpiration } from '@/lib/oauth/tokens'
 import { createAdminClient } from '@/lib/supabase/admin'
 
@@ -54,7 +53,7 @@ export async function GET(request: Request) {
       // Redirect to login with return URL
       const loginUrl = new URL('/login', request.url)
       loginUrl.searchParams.set('redirect', request.url)
-      return redirect(loginUrl.toString())
+      return NextResponse.redirect(loginUrl.toString())
     }
 
     // Check if user has a business (required for using the app)
@@ -68,7 +67,7 @@ export async function GET(request: Request) {
       // Redirect to onboarding
       const onboardingUrl = new URL('/onboarding', request.url)
       onboardingUrl.searchParams.set('redirect', request.url)
-      return redirect(onboardingUrl.toString())
+      return NextResponse.redirect(onboardingUrl.toString())
     }
 
     // If user is authenticated and has business, show consent page
@@ -81,7 +80,7 @@ export async function GET(request: Request) {
       consentUrl.searchParams.set('state', state)
     }
 
-    return redirect(consentUrl.toString())
+    return NextResponse.redirect(consentUrl.toString())
   } catch (error: any) {
     console.error('OAuth authorize error:', error)
     return NextResponse.json(
