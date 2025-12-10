@@ -66,7 +66,7 @@ export default function LandingPage() {
             </h2>
             <p className="text-xl md:text-2xl text-slate-700 mb-10 max-w-3xl mx-auto leading-relaxed">
               FiveStars automates review requests and generates perfect AI-powered replies
-              in your brand's tone.
+              in your brand&apos;s tone.
             </p>
             <div className="flex gap-4 justify-center flex-wrap">
               <Link href="/signup">
@@ -191,7 +191,7 @@ export default function LandingPage() {
                 <CardTitle className="text-xl mb-2 text-slate-900">AI Review Replies</CardTitle>
                 <CardDescription className="text-base text-slate-700">
                   Generate professional, personalized replies to customer reviews in seconds
-                  with AI. Match your brand's voice perfectly.
+                  with AI. Match your brand&apos;s voice perfectly.
                 </CardDescription>
               </CardHeader>
             </Card>
