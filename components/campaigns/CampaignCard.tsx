@@ -15,8 +15,8 @@ interface CampaignCardProps {
 
 export function CampaignCard({ campaign }: CampaignCardProps) {
   return (
-    <div className="relative">
-      <Link href={`/dashboard/campaigns/${campaign.id}`}>
+    <div className="relative group">
+      <Link href={`/dashboard/campaigns/${campaign.id}`} className="block">
         <Card className="border-amber-200 shadow-sm hover:shadow-md transition-all cursor-pointer hover:border-amber-300">
           <CardHeader>
             <CardTitle className="text-lg text-slate-900">{campaign.name}</CardTitle>
@@ -29,7 +29,17 @@ export function CampaignCard({ campaign }: CampaignCardProps) {
               <div className="text-sm text-slate-500 font-mono flex-1">
                 ID: {campaign.campaign_id}
               </div>
-              <div onClick={(e) => e.stopPropagation()} className="flex-shrink-0">
+              <div 
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                }}
+                onMouseDown={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                }}
+                className="flex-shrink-0 relative z-20"
+              >
                 <CopyToClipboard text={campaign.campaign_id} />
               </div>
             </div>
