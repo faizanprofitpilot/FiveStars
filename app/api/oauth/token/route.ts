@@ -3,6 +3,8 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { createOAuthTokens, refreshAccessToken } from '@/lib/oauth/auth'
 import { isTokenExpired } from '@/lib/oauth/tokens'
 
+export const dynamic = 'force-dynamic'
+
 /**
  * OAuth 2.0 Token Endpoint
  * POST /api/oauth/token

@@ -4,6 +4,8 @@ import { sendReviewRequestInternal } from '@/lib/zapier/send-review-request'
 import { authenticateOAuthToken, extractOAuthToken } from '@/lib/oauth/auth'
 import { z } from 'zod'
 
+export const dynamic = 'force-dynamic'
+
 const zapierSchema = z.object({
   campaign_id: z.string(),
   first_name: z.string().min(1),

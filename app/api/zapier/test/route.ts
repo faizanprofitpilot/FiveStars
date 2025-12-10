@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server'
 import { authenticateOAuthToken, extractOAuthToken } from '@/lib/oauth/auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 
+export const dynamic = 'force-dynamic'
+
 /**
  * Test endpoint for Zapier OAuth authentication
  * Returns user info if authenticated successfully

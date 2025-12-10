@@ -4,6 +4,8 @@ import { redirect } from 'next/navigation'
 import { generateAuthorizationCode, getTokenExpiration } from '@/lib/oauth/tokens'
 import { createAdminClient } from '@/lib/supabase/admin'
 
+export const dynamic = 'force-dynamic'
+
 /**
  * OAuth 2.0 Authorization Endpoint
  * GET /api/oauth/authorize
