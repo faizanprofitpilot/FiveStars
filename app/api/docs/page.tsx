@@ -290,7 +290,7 @@ export default function APIDocsPage() {
                 For API support or questions, please contact:
               </p>
               <ul className="list-disc list-inside text-gray-600 space-y-1">
-                <li>Email: <a href="mailto:support@getfivestars.xyz" className="text-amber-600 hover:underline">support@getfivestars.xyz</a></li>
+                <li>Email: <a href="mailto:admin@getfivestars.xyz" className="text-amber-600 hover:underline">admin@getfivestars.xyz</a></li>
                 <li>Website: <a href="https://www.getfivestars.xyz" className="text-amber-600 hover:underline">https://www.getfivestars.xyz</a></li>
               </ul>
             </div>
