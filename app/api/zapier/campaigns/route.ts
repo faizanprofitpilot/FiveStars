@@ -61,8 +61,10 @@ export async function GET(request: Request) {
     }
 
     // Format for Zapier dynamic dropdown
-    // Zapier expects: [{ value: "id", label: "Display Name" }]
+    // Zapier expects: [{ id: "unique-id", value: "id", label: "Display Name" }]
+    // For polling triggers, "id" is required for deduplication
     const formattedCampaigns = (campaigns || []).map((campaign) => ({
+      id: campaign.campaign_id, // Required by Zapier for polling triggers
       value: campaign.campaign_id,
       label: campaign.name,
     }))
