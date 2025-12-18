@@ -203,9 +203,9 @@ export default function APIDocsPage() {
                   </div>
                   <ul className="list-disc list-inside text-sm text-gray-600 mt-2 space-y-1">
                     <li><code className="bg-gray-100 px-1 rounded">campaign_id</code> (required): 32-character campaign identifier</li>
-                    <li><code className="bg-gray-100 px-1 rounded">first_name</code> (required): Customer's first name</li>
-                    <li><code className="bg-gray-100 px-1 rounded">phone</code> (optional): Customer's phone number in E.164 format</li>
-                    <li><code className="bg-gray-100 px-1 rounded">email</code> (optional): Customer's email address</li>
+                    <li><code className="bg-gray-100 px-1 rounded">first_name</code> (required): Customer&apos;s first name</li>
+                    <li><code className="bg-gray-100 px-1 rounded">phone</code> (optional): Customer&apos;s phone number in E.164 format</li>
+                    <li><code className="bg-gray-100 px-1 rounded">email</code> (optional): Customer&apos;s email address</li>
                   </ul>
                 </div>
                 <div className="bg-gray-50 rounded p-3 text-sm mb-2">
