@@ -17,6 +17,24 @@ export default function APIDocsPage() {
         </div>
 
         <div className="space-y-12">
+          {/* Base URL */}
+          <section>
+            <h2 className="text-2xl font-semibold text-gray-900 mb-4">Base URL</h2>
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+              <p className="text-gray-700 mb-2">
+                All API requests should be made to the following base URL:
+              </p>
+              <code className="text-lg font-mono bg-white px-3 py-2 rounded border border-amber-300">
+                https://www.getfivestars.xyz
+              </code>
+              <p className="text-sm text-gray-600 mt-3">
+                All endpoints listed below are relative to this base URL. For example, 
+                <code className="bg-white px-1 rounded">/api/zapier/review-request</code> should be accessed at 
+                <code className="bg-white px-1 rounded">https://www.getfivestars.xyz/api/zapier/review-request</code>
+              </p>
+            </div>
+          </section>
+
           {/* Authentication */}
           <section>
             <h2 className="text-2xl font-semibold text-gray-900 mb-4">Authentication</h2>
