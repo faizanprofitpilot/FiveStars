@@ -75,7 +75,7 @@ export default function SMSConsentPage() {
               </p>
               <ul className="list-disc list-inside space-y-2 ml-4 mb-4">
                 <li>An initial review request message shortly after your transaction</li>
-                <li>A follow-up reminder message (if you haven't left a review) after a delay period set by the business</li>
+                <li>A follow-up reminder message (if you haven&apos;t left a review) after a delay period set by the business</li>
               </ul>
             </div>
 
