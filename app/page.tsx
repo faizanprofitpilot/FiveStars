@@ -608,19 +608,19 @@ export default function LandingPage() {
             </div>
             <nav className="flex gap-6 flex-wrap justify-center">
               <Link
-                href="#"
+                href="/privacy"
                 className="text-sm text-slate-700 hover:text-amber-600 transition-colors"
               >
                 Privacy Policy
               </Link>
               <Link
-                href="#"
+                href="/terms"
                 className="text-sm text-slate-700 hover:text-amber-600 transition-colors"
               >
                 Terms of Service
               </Link>
               <Link
-                href="#"
+                href="mailto:admin@getfivestars.xyz"
                 className="text-sm text-slate-700 hover:text-amber-600 transition-colors"
               >
                 Contact
