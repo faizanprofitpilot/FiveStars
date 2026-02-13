@@ -43,7 +43,7 @@ Required environment variables:
 - `OPENAI_API_KEY` - Your OpenAI API key
 - `TWILIO_ACCOUNT_SID` - Twilio account SID
 - `TWILIO_AUTH_TOKEN` - Twilio auth token
-- `TWILIO_PHONE_NUMBER` - Your Twilio phone number
+- `TWILIO_PHONE_NUMBER` - Your Twilio phone number in E.164 format (e.g., `+18774191089` for (877) 419-1089)
 - `RESEND_API_KEY` - Resend API key
 - `RESEND_FROM_EMAIL` - Email address to send from
 - `NEXT_PUBLIC_APP_URL` - Your app URL (e.g., http://localhost:3000 for dev)
