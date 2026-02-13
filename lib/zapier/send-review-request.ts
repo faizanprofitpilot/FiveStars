@@ -87,6 +87,8 @@ export async function sendReviewRequestInternal({
     }
 
     // Get review link from business settings, fallback to default
+    // Note: Each user has their own business profile with their own business_name and review_link
+    // All users share the same Twilio toll-free number, but each message uses the specific user's business data
     const reviewLink = campaign.businesses.review_link || `https://g.page/r/YOUR_REVIEW_LINK`
 
     // Log campaign and business details for debugging
@@ -96,14 +98,16 @@ export async function sendReviewRequestInternal({
       business_id: campaign.businesses.id,
       business_name: campaign.businesses.business_name,
       business_user_id: campaign.businesses.user_id,
+      review_link: reviewLink,
       primary_template: campaign.primary_template,
     })
 
     // Prepare template variables
+    // These are user-specific: each user's business_name and review_link are used
     const templateVariables = {
       first_name: firstName,
-      business_name: campaign.businesses.business_name,
-      review_link: reviewLink,
+      business_name: campaign.businesses.business_name, // User's business name
+      review_link: reviewLink, // User's review link from settings
     }
 
     console.log('Template variables:', templateVariables)

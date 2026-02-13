@@ -3,7 +3,16 @@
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { CheckCircle2, XCircle, Clock, MessageSquare, Mail, AlertCircle } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { CheckCircle2, XCircle, Clock, MessageSquare, Mail, AlertCircle, Trash2, Loader2 } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 
 interface ReviewRequest {
@@ -26,6 +35,8 @@ interface CampaignActivityLogProps {
 export function CampaignActivityLog({ campaignId }: CampaignActivityLogProps) {
   const [requests, setRequests] = useState<ReviewRequest[]>([])
   const [loading, setLoading] = useState(true)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState<string | null>(null)
+  const [deleting, setDeleting] = useState(false)
 
   useEffect(() => {
     async function fetchRequests() {
@@ -51,39 +62,14 @@ export function CampaignActivityLog({ campaignId }: CampaignActivityLogProps) {
 
   const getStatusBadge = (request: ReviewRequest) => {
     if (request.primary_sent) {
-      // Check Twilio status from error_message
-      const twilioStatusMatch = request.error_message?.match(/Twilio status: (\w+)/)
-      const twilioStatus = twilioStatusMatch ? twilioStatusMatch[1] : null
-      
-      // If status is "delivered", show as delivered
-      if (twilioStatus === 'delivered' || (!request.error_message && request.primary_sent)) {
-        return (
-          <Badge className="bg-green-100 text-green-800 border-green-200">
-            <CheckCircle2 className="h-3 w-3 mr-1" />
-            Delivered
-          </Badge>
-        )
-      }
-      
-      // If status is queued/sent, show in progress
-      if (twilioStatus && ['queued', 'sending', 'sent'].includes(twilioStatus)) {
-        return (
-          <Badge className="bg-amber-100 text-amber-800 border-amber-200">
-            <Clock className="h-3 w-3 mr-1" />
-            In Progress
-          </Badge>
-        )
-      }
-      
-      // Default to accepted if sent but no status info
       return (
         <Badge className="bg-green-100 text-green-800 border-green-200">
           <CheckCircle2 className="h-3 w-3 mr-1" />
-          Accepted
+          Sent
         </Badge>
       )
     }
-    if (request.error_message) {
+    if (request.error_message && !request.error_message.includes('Twilio status:')) {
       return (
         <Badge className="bg-red-100 text-red-800 border-red-200">
           <XCircle className="h-3 w-3 mr-1" />
@@ -107,6 +93,29 @@ export function CampaignActivityLog({ campaignId }: CampaignActivityLogProps) {
       return <Mail className="h-4 w-4 text-purple-600" />
     }
     return null
+  }
+
+  const handleDelete = async (requestId: string) => {
+    setDeleting(true)
+    try {
+      const response = await fetch(`/api/review-requests/${requestId}`, {
+        method: 'DELETE',
+      })
+
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.error || 'Failed to delete review request')
+      }
+
+      // Remove from local state and refresh
+      setRequests(requests.filter(r => r.id !== requestId))
+      setDeleteDialogOpen(null)
+    } catch (error: any) {
+      console.error('Delete error:', error)
+      alert(error.message || 'Failed to delete review request')
+    } finally {
+      setDeleting(false)
+    }
   }
 
   if (loading) {
@@ -149,7 +158,7 @@ export function CampaignActivityLog({ campaignId }: CampaignActivityLogProps) {
             {requests.map((request) => (
               <div
                 key={request.id}
-                className="border border-amber-200 rounded-lg p-4 hover:bg-amber-50/50 transition-colors"
+                className="border border-amber-200 rounded-lg p-4 hover:bg-amber-50/50 transition-colors group relative"
               >
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center gap-3">
@@ -168,7 +177,17 @@ export function CampaignActivityLog({ campaignId }: CampaignActivityLogProps) {
                       </div>
                     </div>
                   </div>
-                  {getStatusBadge(request)}
+                  <div className="flex items-center gap-2">
+                    {getStatusBadge(request)}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 text-slate-400 hover:text-red-600 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={() => setDeleteDialogOpen(request.id)}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 pt-4 border-t border-amber-100">
@@ -224,7 +243,7 @@ export function CampaignActivityLog({ campaignId }: CampaignActivityLogProps) {
                   </div>
                 </div>
 
-                {request.error_message && (
+                {request.error_message && !request.error_message.includes('Twilio status:') && (
                   <div className="mt-3 pt-3 border-t border-red-200 bg-red-50/50 rounded-md p-3">
                     <div className="flex items-start gap-2">
                       <AlertCircle className="h-4 w-4 text-red-600 mt-0.5 flex-shrink-0" />
@@ -239,38 +258,56 @@ export function CampaignActivityLog({ campaignId }: CampaignActivityLogProps) {
                 )}
 
                 {request.primary_sent && request.sent_at && (
-                  <div className="mt-3 pt-3 border-t border-amber-200 bg-amber-50/30 rounded-md p-3">
+                  <div className="mt-3 pt-3 border-t border-green-200 bg-green-50/30 rounded-md p-3">
                     <div className="flex items-start gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-amber-600 flex-shrink-0 mt-0.5" />
+                      <CheckCircle2 className="h-4 w-4 text-green-600 flex-shrink-0 mt-0.5" />
                       <div className="flex-1">
-                        <p className="text-xs font-semibold text-amber-900 mb-1">Message Accepted by Twilio</p>
-                        <p className="text-xs text-amber-700 mb-2">
-                          Accepted at {new Date(request.sent_at).toLocaleString()}
+                        <p className="text-xs font-semibold text-green-900 mb-1">Message Sent</p>
+                        <p className="text-xs text-green-700">
+                          Sent at {new Date(request.sent_at).toLocaleString()}
                         </p>
-                        {request.error_message && request.error_message.includes('Twilio status:') && (() => {
-                          const twilioStatusMatch = request.error_message.match(/Twilio status: (\w+)/)
-                          const twilioStatus = twilioStatusMatch ? twilioStatusMatch[1] : null
-                          
-                          // Only show warning if status is queued or sent (not delivered)
-                          if (twilioStatus && ['queued', 'sending', 'sent'].includes(twilioStatus)) {
-                            return (
-                              <div className="mt-2 pt-2 border-t border-amber-200">
-                                <p className="text-xs text-amber-800 font-medium mb-1">⚠️ Important:</p>
-                                <p className="text-xs text-amber-700">
-                                  {request.error_message}
-                                </p>
-                                <p className="text-xs text-amber-600 mt-1 italic">
-                                  If you didn&apos;t receive the message, it may still be queued or the carrier may have blocked it.
-                                </p>
-                              </div>
-                            )
-                          }
-                          return null
-                        })()}
                       </div>
                     </div>
                   </div>
                 )}
+
+                <Dialog open={deleteDialogOpen === request.id} onOpenChange={(open) => !open && setDeleteDialogOpen(null)}>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Delete Review Request</DialogTitle>
+                      <DialogDescription>
+                        Are you sure you want to delete this review request for <span className="font-semibold text-slate-900">{request.customer_first_name}</span>?
+                        This action cannot be undone.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                      <Button
+                        variant="outline"
+                        onClick={() => setDeleteDialogOpen(null)}
+                        disabled={deleting}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        onClick={() => handleDelete(request.id)}
+                        disabled={deleting}
+                      >
+                        {deleting ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Deleting...
+                          </>
+                        ) : (
+                          <>
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Delete
+                          </>
+                        )}
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
               </div>
             ))}
           </div>
