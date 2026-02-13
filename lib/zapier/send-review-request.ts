@@ -20,6 +20,14 @@ export async function sendReviewRequestInternal({
   primary_sent?: boolean
   error?: string
 }> {
+  const sendId = `send_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+  console.log(`[${sendId}] sendReviewRequestInternal called:`, {
+    campaignId,
+    firstName,
+    phone: phone ? '***' + phone.slice(-4) : 'none',
+    email: email ? email.split('@')[0] + '@***' : 'none',
+  })
+
   try {
     const supabase = createAdminClient()
 
@@ -82,12 +90,27 @@ export async function sendReviewRequestInternal({
     // This is the business for the authenticated user ONLY
     const reviewLink = campaign.businesses.review_link || `https://g.page/r/YOUR_REVIEW_LINK`
 
+    console.log(`[${sendId}] Campaign and business details:`, {
+      campaign_id: campaign.id,
+      campaign_name: campaign.name,
+      business_id: campaign.businesses.id,
+      business_name: campaign.businesses.business_name,
+      business_user_id: campaign.businesses.user_id,
+      review_link: reviewLink,
+    })
+
     // Prepare template variables - uses ONLY this user's business data
     const templateVariables = {
       first_name: firstName,
       business_name: campaign.businesses.business_name, // This user's business name ONLY
       review_link: reviewLink, // This user's review link ONLY
     }
+
+    console.log(`[${sendId}] Template variables:`, {
+      first_name: templateVariables.first_name,
+      business_name: templateVariables.business_name,
+      review_link: templateVariables.review_link,
+    })
 
     // Create review request record
     const { data: reviewRequest, error: requestError } = await supabase
@@ -124,10 +147,25 @@ export async function sendReviewRequestInternal({
         templateVariables
       )
       
+      console.log(`[${sendId}] Sending SMS:`, {
+        to: phone ? '***' + phone.slice(-4) : 'none',
+        message_preview: message.substring(0, 100) + '...',
+        business_name: templateVariables.business_name,
+        message_length: message.length,
+      })
+      
       // Send SMS - uses shared Twilio number but this user's business_name and review_link
       const smsResult = await sendSMS({
         to: phone,
         body: message,
+      })
+
+      console.log(`[${sendId}] SMS send result:`, {
+        success: smsResult.success,
+        messageSid: smsResult.messageSid,
+        status: smsResult.status,
+        error: smsResult.error,
+        business_name: templateVariables.business_name,
       })
 
       if (smsResult.success && smsResult.messageSid) {

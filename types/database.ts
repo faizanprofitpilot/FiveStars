@@ -150,6 +150,44 @@ export type Database = {
           created_at?: string
         }
       }
+      zapier_contacts: {
+        Row: {
+          id: string
+          user_id: string
+          business_id: string
+          first_name: string
+          phone: string | null
+          email: string | null
+          campaign_id: string | null
+          source_data: any | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          business_id: string
+          first_name: string
+          phone?: string | null
+          email?: string | null
+          campaign_id?: string | null
+          source_data?: any | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          business_id?: string
+          first_name?: string
+          phone?: string | null
+          email?: string | null
+          campaign_id?: string | null
+          source_data?: any | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
     }
   }
 }
