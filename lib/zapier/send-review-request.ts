@@ -23,7 +23,7 @@ export async function sendReviewRequestInternal({
   try {
     const supabase = createAdminClient()
 
-    // Fetch campaign details
+    // Fetch campaign details with business review link
     const { data: campaign, error: campaignError } = await supabase
       .from('campaigns')
       .select(`
@@ -31,7 +31,8 @@ export async function sendReviewRequestInternal({
         businesses!inner (
           id,
           business_name,
-          user_id
+          user_id,
+          review_link
         )
       `)
       .eq('id', campaignId)
@@ -85,8 +86,18 @@ export async function sendReviewRequestInternal({
       }
     }
 
-    // Generate review link
-    const reviewLink = `https://g.page/r/YOUR_REVIEW_LINK` // TODO: Make configurable
+    // Get review link from business settings, fallback to default
+    const reviewLink = campaign.businesses.review_link || `https://g.page/r/YOUR_REVIEW_LINK`
+
+    // Log campaign and business details for debugging
+    console.log('Campaign and business details:', {
+      campaign_id: campaign.id,
+      campaign_name: campaign.name,
+      business_id: campaign.businesses.id,
+      business_name: campaign.businesses.business_name,
+      business_user_id: campaign.businesses.user_id,
+      primary_template: campaign.primary_template,
+    })
 
     // Prepare template variables
     const templateVariables = {
@@ -94,6 +105,8 @@ export async function sendReviewRequestInternal({
       business_name: campaign.businesses.business_name,
       review_link: reviewLink,
     }
+
+    console.log('Template variables:', templateVariables)
 
     // Create review request record
     const { data: reviewRequest, error: requestError } = await supabase
@@ -129,6 +142,12 @@ export async function sendReviewRequestInternal({
         campaign.primary_template,
         templateVariables
       )
+      
+      console.log('Final SMS message after template replacement:', {
+        original_template: campaign.primary_template,
+        final_message: message,
+        business_name_used: templateVariables.business_name,
+      })
       
       console.log('Attempting to send SMS:', {
         to: phone,

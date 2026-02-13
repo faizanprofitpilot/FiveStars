@@ -51,17 +51,22 @@ export function CampaignActivityLog({ campaignId }: CampaignActivityLogProps) {
 
   const getStatusBadge = (request: ReviewRequest) => {
     if (request.primary_sent) {
-      // Check if error message indicates delivery status
-      const isDelivered = !request.error_message || !request.error_message.includes('Twilio status:')
-      if (isDelivered) {
+      // Check Twilio status from error_message
+      const twilioStatusMatch = request.error_message?.match(/Twilio status: (\w+)/)
+      const twilioStatus = twilioStatusMatch ? twilioStatusMatch[1] : null
+      
+      // If status is "delivered", show as delivered
+      if (twilioStatus === 'delivered' || (!request.error_message && request.primary_sent)) {
         return (
           <Badge className="bg-green-100 text-green-800 border-green-200">
             <CheckCircle2 className="h-3 w-3 mr-1" />
-            Accepted
+            Delivered
           </Badge>
         )
-      } else {
-        // Status is queued/sent but not delivered
+      }
+      
+      // If status is queued/sent, show in progress
+      if (twilioStatus && ['queued', 'sending', 'sent'].includes(twilioStatus)) {
         return (
           <Badge className="bg-amber-100 text-amber-800 border-amber-200">
             <Clock className="h-3 w-3 mr-1" />
@@ -69,6 +74,14 @@ export function CampaignActivityLog({ campaignId }: CampaignActivityLogProps) {
           </Badge>
         )
       }
+      
+      // Default to accepted if sent but no status info
+      return (
+        <Badge className="bg-green-100 text-green-800 border-green-200">
+          <CheckCircle2 className="h-3 w-3 mr-1" />
+          Accepted
+        </Badge>
+      )
     }
     if (request.error_message) {
       return (
@@ -234,17 +247,26 @@ export function CampaignActivityLog({ campaignId }: CampaignActivityLogProps) {
                         <p className="text-xs text-amber-700 mb-2">
                           Accepted at {new Date(request.sent_at).toLocaleString()}
                         </p>
-                        {request.error_message && request.error_message.includes('Twilio status:') && (
-                          <div className="mt-2 pt-2 border-t border-amber-200">
-                            <p className="text-xs text-amber-800 font-medium mb-1">⚠️ Important:</p>
-                            <p className="text-xs text-amber-700">
-                              {request.error_message}
-                            </p>
-                            <p className="text-xs text-amber-600 mt-1 italic">
-                              If you didn&apos;t receive the message, it may still be queued or the carrier may have blocked it.
-                            </p>
-                          </div>
-                        )}
+                        {request.error_message && request.error_message.includes('Twilio status:') && (() => {
+                          const twilioStatusMatch = request.error_message.match(/Twilio status: (\w+)/)
+                          const twilioStatus = twilioStatusMatch ? twilioStatusMatch[1] : null
+                          
+                          // Only show warning if status is queued or sent (not delivered)
+                          if (twilioStatus && ['queued', 'sending', 'sent'].includes(twilioStatus)) {
+                            return (
+                              <div className="mt-2 pt-2 border-t border-amber-200">
+                                <p className="text-xs text-amber-800 font-medium mb-1">⚠️ Important:</p>
+                                <p className="text-xs text-amber-700">
+                                  {request.error_message}
+                                </p>
+                                <p className="text-xs text-amber-600 mt-1 italic">
+                                  If you didn&apos;t receive the message, it may still be queued or the carrier may have blocked it.
+                                </p>
+                              </div>
+                            )
+                          }
+                          return null
+                        })()}
                       </div>
                     </div>
                   </div>

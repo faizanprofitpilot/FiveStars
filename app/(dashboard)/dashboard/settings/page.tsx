@@ -17,6 +17,7 @@ export default function SettingsPage() {
   const [user, setUser] = useState<any>(null)
   const [business, setBusiness] = useState<any>(null)
   const [businessName, setBusinessName] = useState('')
+  const [reviewLink, setReviewLink] = useState('')
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -35,7 +36,7 @@ export default function SettingsPage() {
 
         const { data: businessData, error: businessError } = await supabase
           .from('businesses')
-          .select('business_name, google_profile_url')
+          .select('business_name, google_profile_url, review_link')
           .eq('user_id', currentUser.id)
           .single()
 
@@ -45,6 +46,7 @@ export default function SettingsPage() {
         } else {
           setBusiness(businessData)
           setBusinessName(businessData?.business_name || '')
+          setReviewLink(businessData?.review_link || '')
         }
       } catch (err: any) {
         console.error('Error:', err)
@@ -57,7 +59,7 @@ export default function SettingsPage() {
     fetchData()
   }, [supabase, router])
 
-  const handleSaveBusinessName = async (e: React.FormEvent) => {
+  const handleSaveBusiness = async (e: React.FormEvent) => {
     e.preventDefault()
     setSaving(true)
     setError(null)
@@ -69,9 +71,19 @@ export default function SettingsPage() {
         return
       }
 
+      // Validate review link if provided
+      if (reviewLink.trim() && !reviewLink.trim().startsWith('http')) {
+        setError('Review link must be a valid URL (e.g., https://g.page/r/YOUR_REVIEW_LINK)')
+        setSaving(false)
+        return
+      }
+
       const { error: updateError } = await supabase
         .from('businesses')
-        .update({ business_name: businessName.trim() })
+        .update({ 
+          business_name: businessName.trim(),
+          review_link: reviewLink.trim() || null
+        })
         .eq('user_id', user.id)
 
       if (updateError) {
@@ -79,13 +91,13 @@ export default function SettingsPage() {
       }
 
       // Update local state
-      setBusiness({ ...business, business_name: businessName.trim() })
+      setBusiness({ ...business, business_name: businessName.trim(), review_link: reviewLink.trim() || null })
       
       // Show success (you could add a toast here)
-      alert('Business name updated successfully!')
+      alert('Settings updated successfully!')
     } catch (err: any) {
-      console.error('Error updating business name:', err)
-      setError(err.message || 'Failed to update business name')
+      console.error('Error updating business settings:', err)
+      setError(err.message || 'Failed to update settings')
     } finally {
       setSaving(false)
     }
@@ -123,38 +135,63 @@ export default function SettingsPage() {
             </div>
           </CardHeader>
           <CardContent className="p-6 space-y-6">
-            <form onSubmit={handleSaveBusinessName} className="space-y-4">
+            <form onSubmit={handleSaveBusiness} className="space-y-6">
               <div className="space-y-3">
                 <Label htmlFor="businessName" className="text-slate-700 font-medium">
                   Business Name
                 </Label>
-                <div className="flex items-center gap-3">
-                  <Input
-                    id="businessName"
-                    value={businessName}
-                    onChange={(e) => setBusinessName(e.target.value)}
-                    placeholder="Enter your business name"
-                    disabled={saving}
-                    className="flex-1 h-10 border-gray-200 focus:border-amber-500 focus:ring-amber-500/20"
-                  />
-                  <Button
-                    type="submit"
-                    disabled={saving || !businessName.trim() || businessName === business?.business_name}
-                    className="bg-amber-500 hover:bg-amber-600 text-white font-medium shadow-sm h-10 px-6"
-                  >
-                    {saving ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Saving...
-                      </>
-                    ) : (
-                      <>
-                        <Save className="mr-2 h-4 w-4" />
-                        Save
-                      </>
-                    )}
-                  </Button>
+                <Input
+                  id="businessName"
+                  value={businessName}
+                  onChange={(e) => setBusinessName(e.target.value)}
+                  placeholder="Enter your business name"
+                  disabled={saving}
+                  className="h-10 border-gray-200 focus:border-amber-500 focus:ring-amber-500/20"
+                />
+              </div>
+
+              <div className="space-y-3">
+                <div>
+                  <Label htmlFor="reviewLink" className="text-slate-700 font-medium">
+                    Google Review Link
+                  </Label>
+                  <p className="text-xs text-slate-500 mt-1">
+                    This link will be used in your review request messages. Get your link from Google Business Profile.
+                  </p>
                 </div>
+                <Input
+                  id="reviewLink"
+                  type="url"
+                  value={reviewLink}
+                  onChange={(e) => setReviewLink(e.target.value)}
+                  placeholder="https://g.page/r/YOUR_REVIEW_LINK"
+                  disabled={saving}
+                  className="h-10 border-gray-200 focus:border-amber-500 focus:ring-amber-500/20 font-mono text-sm"
+                />
+                <p className="text-xs text-slate-400">
+                  Example: <span className="font-mono">https://g.page/r/YOUR_REVIEW_LINK</span>
+                </p>
+              </div>
+
+              <div className="flex justify-end pt-2">
+                <Button
+                  type="submit"
+                  disabled={saving || !businessName.trim() || 
+                    (businessName === business?.business_name && reviewLink === (business?.review_link || ''))}
+                  className="bg-amber-500 hover:bg-amber-600 text-white font-medium shadow-sm h-10 px-6"
+                >
+                  {saving ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="mr-2 h-4 w-4" />
+                      Save Changes
+                    </>
+                  )}
+                </Button>
               </div>
               {error && (
                 <div className="rounded-lg bg-destructive/5 border border-destructive/20 p-3 text-sm text-destructive">

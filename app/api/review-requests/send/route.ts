@@ -26,7 +26,7 @@ export async function POST(request: Request) {
     const body = await request.json()
     const validatedData = sendRequestSchema.parse(body)
 
-    // Fetch campaign
+    // Fetch campaign with business review link
     const { data: campaign, error: campaignError } = await supabase
       .from('campaigns')
       .select(`
@@ -34,7 +34,8 @@ export async function POST(request: Request) {
         businesses!inner (
           id,
           business_name,
-          user_id
+          user_id,
+          review_link
         )
       `)
       .eq('id', validatedData.campaign_id)
@@ -74,8 +75,8 @@ export async function POST(request: Request) {
       )
     }
 
-    // Generate review link (placeholder - user would configure this)
-    const reviewLink = `https://g.page/r/YOUR_REVIEW_LINK` // TODO: Make configurable
+    // Get review link from business settings, fallback to default
+    const reviewLink = campaign.businesses.review_link || `https://g.page/r/YOUR_REVIEW_LINK`
 
     // Prepare variables for template
     const templateVariables = {

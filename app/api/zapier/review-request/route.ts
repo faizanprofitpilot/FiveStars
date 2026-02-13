@@ -41,17 +41,122 @@ export async function POST(request: Request) {
     const supabase = createAdminClient()
 
     // Find campaign by campaign_id (the unique string identifier for Zapier)
-    const { data: campaign, error: campaignError } = await supabase
+    // Include business info for logging
+    const { data: campaigns, error: campaignError } = await supabase
       .from('campaigns')
-      .select('id')
+      .select(`
+        id,
+        campaign_id,
+        name,
+        businesses!inner (
+          id,
+          business_name,
+          user_id
+        )
+      `)
       .eq('campaign_id', validatedData.campaign_id)
-      .single()
 
-    if (campaignError || !campaign) {
+    if (campaignError) {
+      console.error('Campaign query error:', campaignError)
+      return NextResponse.json(
+        { error: `Error finding campaign: ${campaignError.message}` },
+        { status: 500 }
+      )
+    }
+
+    if (!campaigns || campaigns.length === 0) {
       return NextResponse.json(
         { error: `Campaign not found with ID: ${validatedData.campaign_id}` },
         { status: 404 }
       )
+    }
+
+    // Check for duplicate campaigns (shouldn't happen but safety check)
+    if (campaigns.length > 1) {
+      console.error('Multiple campaigns found with same campaign_id:', {
+        campaign_id: validatedData.campaign_id,
+        count: campaigns.length,
+        campaigns: campaigns.map(c => {
+          const business = Array.isArray(c.businesses) ? c.businesses[0] : c.businesses
+          return { id: c.id, name: c.name, business: business?.business_name }
+        })
+      })
+      return NextResponse.json(
+        { error: `Multiple campaigns found with ID: ${validatedData.campaign_id}. Please contact support.` },
+        { status: 500 }
+      )
+    }
+
+    const campaign = campaigns[0]
+    // Handle businesses as array or single object
+    const business = Array.isArray(campaign.businesses) ? campaign.businesses[0] : campaign.businesses
+
+    if (!business) {
+      return NextResponse.json(
+        { error: 'Business not found for campaign' },
+        { status: 404 }
+      )
+    }
+
+    // Log which campaign and business we're using
+    console.log('Processing review request:', {
+      campaign_id: campaign.campaign_id,
+      campaign_name: campaign.name,
+      campaign_uuid: campaign.id,
+      business_name: business.business_name,
+      business_id: business.id,
+      user_id: business.user_id,
+      requested_user_id: userId,
+      phone: validatedData.phone,
+      first_name: validatedData.first_name,
+    })
+
+    // Verify the campaign belongs to the authenticated user
+    if (business.user_id !== userId) {
+      console.error('Campaign ownership mismatch:', {
+        campaign_business_user_id: business.user_id,
+        authenticated_user_id: userId,
+        campaign_id: campaign.campaign_id,
+      })
+      return NextResponse.json(
+        { error: 'Campaign does not belong to authenticated user' },
+        { status: 403 }
+      )
+    }
+
+    // Deduplication: Check if we recently sent to this phone number for this campaign
+    if (validatedData.phone) {
+      const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString()
+      
+      const { data: recentRequests, error: recentError } = await supabase
+        .from('review_requests')
+        .select('id, created_at, primary_sent')
+        .eq('campaign_id', campaign.id)
+        .eq('customer_phone', validatedData.phone)
+        .gte('created_at', fiveMinutesAgo)
+        .order('created_at', { ascending: false })
+        .limit(1)
+
+      if (recentError) {
+        console.error('Error checking for duplicates:', recentError)
+      } else if (recentRequests && recentRequests.length > 0) {
+        const recent = recentRequests[0]
+        console.warn('Duplicate request detected:', {
+          recent_request_id: recent.id,
+          recent_created_at: recent.created_at,
+          phone: validatedData.phone,
+          campaign_id: campaign.campaign_id,
+        })
+        return NextResponse.json(
+          { 
+            success: false,
+            error: 'Duplicate request: A review request was already sent to this phone number in the last 5 minutes',
+            review_request_id: recent.id,
+            primary_sent: recent.primary_sent,
+          },
+          { status: 409 } // Conflict status
+        )
+      }
     }
 
     // Send review request using internal function
@@ -70,6 +175,8 @@ export async function POST(request: Request) {
       review_request_id: result.review_request_id,
       phone_provided: !!validatedData.phone,
       email_provided: !!validatedData.email,
+      campaign_id: campaign.campaign_id,
+      business_name: business.business_name,
     })
 
     if (!result.success) {

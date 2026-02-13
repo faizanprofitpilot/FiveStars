@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS businesses (
   business_name TEXT NOT NULL,
   google_profile_url TEXT,
   context_document TEXT,
+  review_link TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW()) NOT NULL,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW()) NOT NULL
 );

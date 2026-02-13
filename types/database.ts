@@ -8,6 +8,7 @@ export type Database = {
           business_name: string
           google_profile_url: string | null
           context_document: string | null
+          review_link: string | null
           created_at: string
           updated_at: string
         }
@@ -17,6 +18,7 @@ export type Database = {
           business_name: string
           google_profile_url?: string | null
           context_document?: string | null
+          review_link?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -26,6 +28,7 @@ export type Database = {
           business_name?: string
           google_profile_url?: string | null
           context_document?: string | null
+          review_link?: string | null
           created_at?: string
           updated_at?: string
         }

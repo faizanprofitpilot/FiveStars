@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Plus, Megaphone, MessageSquare, TrendingUp, ArrowRight } from 'lucide-react'
+import { DashboardActivityLog } from '@/components/dashboard/DashboardActivityLog'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -167,7 +168,10 @@ export default async function DashboardPage() {
         </Card>
       </div>
 
-      {/* Empty State or Recent Activity could go here */}
+      {/* Recent Activity Log */}
+      <DashboardActivityLog />
+
+      {/* Empty State */}
       {campaignCount === 0 && (
         <Card className="border-dashed border-2 border-gray-200 bg-gray-50/50 shadow-none">
           <CardHeader className="text-center py-12">
