@@ -61,16 +61,6 @@ export function DashboardSidebar() {
           )
         })}
       </nav>
-      
-      <div className="p-4 border-t border-gray-100">
-        <div className="bg-slate-50 rounded-lg p-4">
-          <p className="text-xs font-medium text-slate-900 mb-1">Need help?</p>
-          <p className="text-xs text-slate-500 mb-3">Check our documentation or contact support.</p>
-          <Link href="/api/docs" className="text-xs font-medium text-amber-600 hover:text-amber-700 block">
-            View Documentation &rarr;
-          </Link>
-        </div>
-      </div>
     </aside>
   )
 }
