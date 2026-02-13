@@ -18,10 +18,7 @@ import {
   Play,
   Settings,
   Plug,
-  MessageSquareReply,
-  Megaphone,
   Brain,
-  TrendingUp,
 } from 'lucide-react'
 
 export default function LandingPage() {
@@ -156,7 +153,7 @@ export default function LandingPage() {
           </div>
         </AnimatedSection>
 
-        {/* Hero Screenshot Mockup */}
+        {/* Hero Screenshot Mockup - Only Illustration */}
         <AnimatedSection animation="scale-in" delay={300}>
           <div className="mt-16 mb-8">
             <div className="relative max-w-5xl mx-auto">
@@ -180,28 +177,6 @@ export default function LandingPage() {
           </div>
         </AnimatedSection>
       </section>
-
-      {/* Trust Section */}
-      <AnimatedSection animation="fade-in" delay={0}>
-        <section className="py-12 border-y border-amber-200 bg-white">
-          <div className="container mx-auto px-4 max-w-6xl">
-            <p className="text-center text-sm font-semibold text-slate-600 uppercase tracking-wider mb-8">
-              Trusted by businesses nationwide
-            </p>
-            <div className="flex items-center justify-center gap-12 flex-wrap opacity-40">
-              {['Company A', 'Company B', 'Company C', 'Company D'].map((name, i) => (
-                <div
-                  key={i}
-                  className="text-2xl font-bold text-slate-800 tracking-tight hover:opacity-60 transition-opacity"
-                  style={{ animationDelay: `${i * 100}ms` }}
-                >
-                  {name}
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      </AnimatedSection>
 
       {/* Features Section */}
       <section id="features" className="container mx-auto px-4 py-24 max-w-6xl bg-amber-50 scroll-mt-20">
@@ -384,83 +359,73 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Screenshot Showcase */}
+      {/* Feature Details Section - Replaces Screenshot Showcase */}
       <section className="container mx-auto px-4 py-24 max-w-6xl bg-amber-50">
         <AnimatedSection animation="fade-in-up" delay={0}>
           <div className="text-center mb-16">
             <h3 className="text-4xl md:text-5xl font-bold mb-4 text-slate-900">
-              See FiveStars in Action
+              Built for Modern Businesses
             </h3>
             <p className="text-xl text-slate-700 max-w-2xl mx-auto">
-              Beautiful, intuitive interfaces designed for speed
+              Everything you need to manage reviews efficiently and grow your reputation
             </p>
           </div>
         </AnimatedSection>
 
-        <div className="grid md:grid-cols-3 gap-8">
-          {/* Screenshot 1: Campaign Builder */}
-          <AnimatedSection animation="slide-in-left" delay={100}>
+        <div className="grid md:grid-cols-2 gap-12 max-w-4xl mx-auto">
+          <AnimatedSection animation="fade-in-up" delay={100}>
             <div className="space-y-4">
-              <div className="rounded-xl shadow-xl border border-amber-200 bg-gradient-to-br from-amber-50 to-white p-2 overflow-hidden hover:scale-105 transition-transform">
-                <div className="bg-white rounded-lg overflow-hidden">
-                  <div className="bg-slate-100 px-4 py-2 flex items-center gap-2 border-b">
-                    <div className="w-2 h-2 rounded-full bg-red-500"></div>
-                    <div className="w-2 h-2 rounded-full bg-amber-500"></div>
-                    <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                  </div>
-                  <div className="aspect-[4/3] bg-gradient-to-br from-amber-50 to-yellow-50 flex items-center justify-center">
-                    <Megaphone className="h-16 w-16 text-amber-600 opacity-30" />
-                  </div>
-                </div>
-              </div>
-              <div className="text-center">
-                <h4 className="font-semibold text-lg text-slate-900 mb-2">Campaign Builder</h4>
-                <p className="text-slate-700">Create and manage review campaigns effortlessly</p>
-              </div>
+              <h4 className="text-2xl font-bold text-slate-900">Campaign Management</h4>
+              <p className="text-lg text-slate-700 leading-relaxed">
+                Create unlimited campaigns with custom messaging templates. Choose between SMS or email channels, 
+                set up automated follow-ups, and track performance all from one intuitive dashboard.
+              </p>
+              <p className="text-lg text-slate-700 leading-relaxed">
+                Personalize every message with dynamic variables like customer names, business information, 
+                and direct review links. Your campaigns work automatically once connected to your workflow.
+              </p>
             </div>
           </AnimatedSection>
 
-          {/* Screenshot 2: AI Reply Generator */}
           <AnimatedSection animation="fade-in-up" delay={200}>
             <div className="space-y-4">
-              <div className="rounded-xl shadow-xl border border-amber-200 bg-gradient-to-br from-yellow-50 to-white p-2 overflow-hidden hover:scale-105 transition-transform">
-                <div className="bg-white rounded-lg overflow-hidden">
-                  <div className="bg-slate-100 px-4 py-2 flex items-center gap-2 border-b">
-                    <div className="w-2 h-2 rounded-full bg-red-500"></div>
-                    <div className="w-2 h-2 rounded-full bg-amber-500"></div>
-                    <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                  </div>
-                  <div className="aspect-[4/3] bg-gradient-to-br from-yellow-50 to-amber-50 flex items-center justify-center">
-                    <MessageSquareReply className="h-16 w-16 text-yellow-700 opacity-30" />
-                  </div>
-                </div>
-              </div>
-              <div className="text-center">
-                <h4 className="font-semibold text-lg text-slate-900 mb-2">AI Reply Generator</h4>
-                <p className="text-slate-700">Generate perfect replies in seconds with AI</p>
-              </div>
+              <h4 className="text-2xl font-bold text-slate-900">AI-Powered Reply Generation</h4>
+              <p className="text-lg text-slate-700 leading-relaxed">
+                Never struggle with responding to reviews again. Our AI analyzes each review and generates 
+                professional, personalized replies that match your brand&apos;s tone and voice.
+              </p>
+              <p className="text-lg text-slate-700 leading-relaxed">
+                Choose from multiple response styles—professional, friendly, apology-focused, or short and sweet. 
+                Edit and customize before sending, or copy directly to your review platform.
+              </p>
             </div>
           </AnimatedSection>
 
-          {/* Screenshot 3: Dashboard */}
-          <AnimatedSection animation="slide-in-right" delay={300}>
+          <AnimatedSection animation="fade-in-up" delay={300}>
             <div className="space-y-4">
-              <div className="rounded-xl shadow-xl border border-amber-200 bg-gradient-to-br from-amber-50 to-white p-2 overflow-hidden hover:scale-105 transition-transform">
-                <div className="bg-white rounded-lg overflow-hidden">
-                  <div className="bg-slate-100 px-4 py-2 flex items-center gap-2 border-b">
-                    <div className="w-2 h-2 rounded-full bg-red-500"></div>
-                    <div className="w-2 h-2 rounded-full bg-amber-500"></div>
-                    <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                  </div>
-                  <div className="aspect-[4/3] bg-gradient-to-br from-amber-50 to-yellow-50 flex items-center justify-center">
-                    <TrendingUp className="h-16 w-16 text-amber-600 opacity-30" />
-                  </div>
-                </div>
-              </div>
-              <div className="text-center">
-                <h4 className="font-semibold text-lg text-slate-900 mb-2">Analytics Dashboard</h4>
-                <p className="text-slate-700">Track performance and insights at a glance</p>
-              </div>
+              <h4 className="text-2xl font-bold text-slate-900">Seamless Integrations</h4>
+              <p className="text-lg text-slate-700 leading-relaxed">
+                Connect FiveStars to your existing tools through Zapier. Automatically trigger review requests 
+                when customers make purchases, complete services, or any other event in your workflow.
+              </p>
+              <p className="text-lg text-slate-700 leading-relaxed">
+                Works with 5,000+ apps including HubSpot, Square, Salesforce, and more. No coding required—just 
+                connect and automate.
+              </p>
+            </div>
+          </AnimatedSection>
+
+          <AnimatedSection animation="fade-in-up" delay={400}>
+            <div className="space-y-4">
+              <h4 className="text-2xl font-bold text-slate-900">Real-Time Analytics</h4>
+              <p className="text-lg text-slate-700 leading-relaxed">
+                Track your review request performance with detailed analytics. See how many requests you&apos;ve sent, 
+                monitor SMS vs email delivery rates, and measure campaign effectiveness.
+              </p>
+              <p className="text-lg text-slate-700 leading-relaxed">
+                View activity logs for every campaign, track follow-up sequences, and identify opportunities to 
+                improve your review collection strategy.
+              </p>
             </div>
           </AnimatedSection>
         </div>
