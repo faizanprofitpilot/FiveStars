@@ -42,15 +42,13 @@ export default async function IntegrationsPage() {
         
         <CardContent className="p-0 min-h-[600px]">
           <zapier-workflow
-            client-id="lXzMag97Ld8abTu8pXusknAywkqdo1nFzW3Ftw51"
-            theme="light"
             sign-up-email={email}
             sign-up-first-name={firstName || ''}
             sign-up-last-name={lastName || ''}
+            client-id="lXzMag97Ld8abTu8pXusknAywkqdo1nFzW3Ftw51"
+            theme="light"
             intro-copy-display="show"
-            manage-zaps-display="show"
             guess-zap-display="show"
-            app-search-bar-display="show"
           />
         </CardContent>
       </Card>
