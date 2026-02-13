@@ -52,14 +52,6 @@ export async function sendReviewRequestInternal({
 
     // Validate contact info based on primary channel
     const primaryChannel = campaign.primary_channel
-    
-    console.log('Campaign channel configuration:', {
-      primary_channel: primaryChannel,
-      phone_provided: !!phone,
-      email_provided: !!email,
-      phone_valid: phone ? validatePhoneNumber(phone) : false,
-    })
-    
     if (
       primaryChannel === 'sms' &&
       (!phone || !validatePhoneNumber(phone))
@@ -87,30 +79,15 @@ export async function sendReviewRequestInternal({
     }
 
     // Get review link from business settings, fallback to default
-    // Note: Each user has their own business profile with their own business_name and review_link
-    // All users share the same Twilio toll-free number, but each message uses the specific user's business data
+    // This is the business for the authenticated user ONLY
     const reviewLink = campaign.businesses.review_link || `https://g.page/r/YOUR_REVIEW_LINK`
 
-    // Log campaign and business details for debugging
-    console.log('Campaign and business details:', {
-      campaign_id: campaign.id,
-      campaign_name: campaign.name,
-      business_id: campaign.businesses.id,
-      business_name: campaign.businesses.business_name,
-      business_user_id: campaign.businesses.user_id,
-      review_link: reviewLink,
-      primary_template: campaign.primary_template,
-    })
-
-    // Prepare template variables
-    // These are user-specific: each user's business_name and review_link are used
+    // Prepare template variables - uses ONLY this user's business data
     const templateVariables = {
       first_name: firstName,
-      business_name: campaign.businesses.business_name, // User's business name
-      review_link: reviewLink, // User's review link from settings
+      business_name: campaign.businesses.business_name, // This user's business name ONLY
+      review_link: reviewLink, // This user's review link ONLY
     }
-
-    console.log('Template variables:', templateVariables)
 
     // Create review request record
     const { data: reviewRequest, error: requestError } = await supabase
@@ -147,33 +124,10 @@ export async function sendReviewRequestInternal({
         templateVariables
       )
       
-      console.log('Final SMS message after template replacement:', {
-        original_template: campaign.primary_template,
-        final_message: message,
-        business_name_used: templateVariables.business_name,
-      })
-      
-      console.log('Attempting to send SMS:', {
-        to: phone,
-        phone_raw: phone,
-        message_length: message.length,
-        campaign_id: campaignId,
-        review_request_id: reviewRequest.id,
-        twilio_configured: !!(process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_PHONE_NUMBER),
-        twilio_phone: process.env.TWILIO_PHONE_NUMBER || 'NOT SET',
-      })
-      
+      // Send SMS - uses shared Twilio number but this user's business_name and review_link
       const smsResult = await sendSMS({
         to: phone,
         body: message,
-      })
-
-      console.log('SMS send result:', {
-        success: smsResult.success,
-        messageSid: smsResult.messageSid,
-        status: smsResult.status,
-        error: smsResult.error,
-        full_result: smsResult,
       })
 
       if (smsResult.success && smsResult.messageSid) {
