@@ -29,7 +29,7 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
   }
 
   return (
-    <header className="sticky top-0 z-30 w-full border-b border-gray-100 bg-white/80 backdrop-blur-md">
+    <header className="sticky top-0 z-30 w-full border-b border-gray-200 bg-white/80 backdrop-blur-md">
       <div className="flex h-16 items-center justify-between px-8">
         <div className="flex items-center gap-4">
           {/* Breadcrumbs or page title could go here */}

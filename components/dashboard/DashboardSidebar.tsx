@@ -24,7 +24,7 @@ export function DashboardSidebar() {
   const pathname = usePathname()
 
   return (
-    <aside className="w-64 bg-white border-r border-gray-100 flex flex-col min-h-screen shadow-[1px_0_20px_0_rgba(0,0,0,0.02)] z-10">
+    <aside className="w-64 bg-white border-r border-gray-200 flex flex-col min-h-screen shadow-[1px_0_20px_0_rgba(0,0,0,0.05)] z-10">
       <div className="p-6 pb-8">
         <Link href="/dashboard" className="flex items-center gap-3">
           <Image
