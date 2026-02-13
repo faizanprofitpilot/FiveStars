@@ -151,20 +151,25 @@ export async function POST(request: Request) {
 
     // Store contact for tracking (optional - doesn't block sending)
     if (validatedData.phone || validatedData.email) {
-      await supabase
-        .from('zapier_contacts')
-        .insert({
-          user_id: userId,
-          business_id: userBusiness.id,
-          first_name: validatedData.first_name,
-          phone: validatedData.phone || null,
-          email: validatedData.email || null,
-          campaign_id: campaign.id,
-        })
-        .catch(err => {
+      try {
+        const { error } = await supabase
+          .from('zapier_contacts')
+          .insert({
+            user_id: userId,
+            business_id: userBusiness.id,
+            first_name: validatedData.first_name,
+            phone: validatedData.phone || null,
+            email: validatedData.email || null,
+            campaign_id: campaign.id,
+          })
+        if (error) {
           // Ignore errors - this is just for tracking
-          console.error(`[${requestId}] Error storing contact (non-blocking):`, err)
-        })
+          console.error(`[${requestId}] Error storing contact (non-blocking):`, error)
+        }
+      } catch (err) {
+        // Ignore errors - this is just for tracking
+        console.error(`[${requestId}] Error storing contact (non-blocking):`, err)
+      }
     }
 
     // Send review request using internal function
