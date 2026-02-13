@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft } from 'lucide-react'
 import { CampaignTabs } from '@/components/campaigns/CampaignTabs'
+import { DeleteCampaignButton } from '@/components/campaigns/DeleteCampaignButton'
 
 export default async function CampaignDetailPage({
   params,
@@ -59,7 +60,10 @@ export default async function CampaignDetailPage({
           </div>
         </div>
         <div className="flex gap-2">
-          {/* Action buttons could go here */}
+          <DeleteCampaignButton 
+            campaignId={campaign.id} 
+            campaignName={campaign.name}
+          />
         </div>
       </div>
 
