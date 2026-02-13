@@ -33,3 +33,26 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_zapier_contacts_unique_email
 
 -- Add comment
 COMMENT ON TABLE zapier_contacts IS 'Stores contacts fetched from Zapier, associated with the user/business that fetched them';
+
+-- Enable Row Level Security
+ALTER TABLE zapier_contacts ENABLE ROW LEVEL SECURITY;
+
+-- RLS Policies: Users can only access their own contacts
+CREATE POLICY "Users can view their own zapier contacts"
+  ON zapier_contacts FOR SELECT
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert their own zapier contacts"
+  ON zapier_contacts FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update their own zapier contacts"
+  ON zapier_contacts FOR UPDATE
+  USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
+
+-- Note: DELETE policy not needed as contacts are managed server-side via admin client
+-- But we can add it for completeness
+CREATE POLICY "Users can delete their own zapier contacts"
+  ON zapier_contacts FOR DELETE
+  USING (auth.uid() = user_id);
