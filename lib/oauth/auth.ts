@@ -46,6 +46,7 @@ export function extractOAuthToken(request: Request): string | null {
 
 /**
  * Create OAuth tokens for a user
+ * CRITICAL: Each user gets their own isolated tokens - tokens are scoped to user_id
  */
 export async function createOAuthTokens(
   userId: string,
@@ -59,11 +60,19 @@ export async function createOAuthTokens(
 
   const supabase = createAdminClient()
 
-  // Store tokens
+  // CRITICAL: Delete any existing tokens for this user+client combination
+  // This ensures only one active connection per user per client
+  await supabase
+    .from('oauth_tokens')
+    .delete()
+    .eq('user_id', userId)
+    .eq('client_id', clientId)
+
+  // Store new tokens - scoped to this specific user
   const { error } = await supabase
     .from('oauth_tokens')
     .insert({
-      user_id: userId,
+      user_id: userId, // CRITICAL: Each token is tied to a specific user
       access_token: accessToken,
       refresh_token: refreshToken,
       token_type: 'Bearer',
