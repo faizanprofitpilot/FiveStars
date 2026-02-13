@@ -40,14 +40,30 @@ export async function POST(request: Request) {
 
     const supabase = createAdminClient()
 
-    // Find campaign by campaign_id (the unique string identifier for Zapier)
-    // Include business info for logging
+    // CRITICAL: First get the user's business to ensure we only find campaigns for this user
+    const { data: userBusiness, error: businessError } = await supabase
+      .from('businesses')
+      .select('id')
+      .eq('user_id', userId)
+      .single()
+
+    if (businessError || !userBusiness) {
+      console.error('User business not found:', businessError)
+      return NextResponse.json(
+        { error: 'Business profile not found for authenticated user' },
+        { status: 404 }
+      )
+    }
+
+    // Find campaign by campaign_id AND ensure it belongs to the authenticated user's business
+    // This prevents cross-user campaign access
     const { data: campaigns, error: campaignError } = await supabase
       .from('campaigns')
       .select(`
         id,
         campaign_id,
         name,
+        business_id,
         businesses!inner (
           id,
           business_name,
@@ -55,6 +71,7 @@ export async function POST(request: Request) {
         )
       `)
       .eq('campaign_id', validatedData.campaign_id)
+      .eq('business_id', userBusiness.id) // CRITICAL: Only find campaigns for this user's business
 
     if (campaignError) {
       console.error('Campaign query error:', campaignError)
@@ -106,17 +123,20 @@ export async function POST(request: Request) {
       business_name: business.business_name,
       business_id: business.id,
       user_id: business.user_id,
-      requested_user_id: userId,
+      authenticated_user_id: userId,
       phone: validatedData.phone,
       first_name: validatedData.first_name,
     })
 
-    // Verify the campaign belongs to the authenticated user
+    // Double-check: Verify the campaign belongs to the authenticated user
+    // This should never fail if the query above is correct, but it's a safety check
     if (business.user_id !== userId) {
-      console.error('Campaign ownership mismatch:', {
+      console.error('SECURITY ERROR: Campaign ownership mismatch despite business_id filter:', {
         campaign_business_user_id: business.user_id,
         authenticated_user_id: userId,
         campaign_id: campaign.campaign_id,
+        campaign_business_id: campaign.business_id,
+        user_business_id: userBusiness.id,
       })
       return NextResponse.json(
         { error: 'Campaign does not belong to authenticated user' },
@@ -125,13 +145,14 @@ export async function POST(request: Request) {
     }
 
     // Deduplication: Check if we recently sent to this phone number for this campaign
+    // This prevents duplicate sends within 5 minutes for the same phone number
     if (validatedData.phone) {
       const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString()
       
       const { data: recentRequests, error: recentError } = await supabase
         .from('review_requests')
-        .select('id, created_at, primary_sent')
-        .eq('campaign_id', campaign.id)
+        .select('id, created_at, primary_sent, campaign_id')
+        .eq('campaign_id', campaign.id) // Scoped to this specific campaign
         .eq('customer_phone', validatedData.phone)
         .gte('created_at', fiveMinutesAgo)
         .order('created_at', { ascending: false })

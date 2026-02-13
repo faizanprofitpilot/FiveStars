@@ -30,7 +30,16 @@ interface ReviewRequest {
   campaign_name?: string
 }
 
-export function DashboardActivityLog() {
+interface DateRange {
+  from: Date | undefined
+  to: Date | undefined
+}
+
+interface DashboardActivityLogProps {
+  dateRange?: DateRange
+}
+
+export function DashboardActivityLog({ dateRange }: DashboardActivityLogProps) {
   const [requests, setRequests] = useState<ReviewRequest[]>([])
   const [loading, setLoading] = useState(true)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState<string | null>(null)
@@ -39,7 +48,15 @@ export function DashboardActivityLog() {
   useEffect(() => {
     async function fetchRequests() {
       try {
-        const response = await fetch('/api/dashboard/activity')
+        const params = new URLSearchParams()
+        if (dateRange?.from) {
+          params.set('from', dateRange.from.toISOString())
+        }
+        if (dateRange?.to) {
+          params.set('to', dateRange.to.toISOString())
+        }
+
+        const response = await fetch(`/api/dashboard/activity?${params.toString()}`)
         const data = await response.json()
         if (data.requests) {
           setRequests(data.requests)
@@ -56,7 +73,7 @@ export function DashboardActivityLog() {
     // Auto-refresh every 30 seconds
     const interval = setInterval(fetchRequests, 30000)
     return () => clearInterval(interval)
-  }, [])
+  }, [dateRange])
 
   const getStatusBadge = (request: ReviewRequest) => {
     if (request.primary_sent) {
@@ -129,21 +146,23 @@ export function DashboardActivityLog() {
 
   return (
     <Card className="border-gray-100 shadow-[0_2px_10px_rgba(0,0,0,0.03)]">
-      <CardHeader className="flex items-center justify-between pb-4 text-left">
-        <div className="text-left">
-          <CardTitle className="text-xl font-semibold tracking-tight text-slate-900 text-left">Recent Activity</CardTitle>
-          <CardDescription className="text-slate-500 mt-1 text-left">
-            Latest review requests across all campaigns
-          </CardDescription>
+      <CardHeader className="pb-4">
+        <div className="flex items-start justify-between">
+          <div>
+            <CardTitle className="text-xl font-semibold tracking-tight text-slate-900">Recent Activity</CardTitle>
+            <CardDescription className="text-slate-500 mt-1">
+              Latest review requests across all campaigns
+            </CardDescription>
+          </div>
+          {requests.length > 0 && (
+            <Link href="/dashboard/campaigns" className="shrink-0 ml-4">
+              <Badge variant="outline" className="border-gray-200 text-slate-600 hover:border-amber-200 hover:text-amber-600 transition-colors cursor-pointer">
+                View All
+                <ArrowRight className="h-3 w-3 ml-1" />
+              </Badge>
+            </Link>
+          )}
         </div>
-        {requests.length > 0 && (
-          <Link href="/dashboard/campaigns">
-            <Badge variant="outline" className="border-gray-200 text-slate-600 hover:border-amber-200 hover:text-amber-600 transition-colors cursor-pointer">
-              View All
-              <ArrowRight className="h-3 w-3 ml-1" />
-            </Badge>
-          </Link>
-        )}
       </CardHeader>
       <CardContent className="text-left">
         {requests.length === 0 ? (
