@@ -53,61 +53,44 @@ In the **Options** section at the bottom of the field configuration:
 
 **Note**: The dropdown will be configured in the API Configuration tab, not here.
 
-### Step 3: Configure Dynamic Dropdown in API Configuration
+### Step 3: Create a Hidden Trigger for Campaigns
 
-1. **In the API Configuration tab**, look for a checkbox that says **"Switch to Code Mode"**
-2. ✅ **Check "Switch to Code Mode"** - this will show you the code editor
-3. You'll see the code for your action. You need to add a `performList` function for the `campaign_id` field
+**Important**: For action input fields, Zapier requires a **hidden trigger** to populate dynamic dropdowns. You cannot use `performList` directly in actions.
 
-**Add the performList Function:**
+1. **Go to your Zapier app** in the Platform UI
+2. **Create a new Trigger** (not an action)
+3. **Name it**: "Campaign List" or "Get Campaigns" (this will be hidden from users)
+4. **Configure the trigger**:
+   - Go to **API Configuration** tab
+   - **Method**: `GET`
+   - **URL**: `https://www.getfivestars.xyz/api/zapier/campaigns`
+   - **Headers**: 
+     ```
+     Authorization: Bearer {{bundle.authData.access_token}}
+     ```
+5. **Set the trigger as Hidden**:
+   - Go to **Settings** tab
+   - Find **"Visibility"** or **"Hidden"** option
+   - ✅ **Check "Hidden"** - this prevents users from seeing it in the trigger list
+6. **Configure Output Fields** (optional but recommended):
+   - Add output fields: `value` and `label`
+   - This helps Zapier understand the data structure
+7. **Save the trigger**
 
-In the code editor, you should see something like:
+### Step 4: Link the Trigger to Campaign ID Field
 
-```javascript
-const perform = async (z, bundle) => {
-  // Your existing POST request code for sending review request
-  return z.request({
-    method: 'POST',
-    url: 'https://www.getfivestars.xyz/api/zapier/review-request',
-    // ... rest of your code
-  })
-}
-```
-
-**Add this new function** (for the dropdown):
-
-```javascript
-const performList = async (z, bundle) => {
-  // This populates the dropdown for campaign_id field
-  const response = await z.request({
-    method: 'GET',
-    url: 'https://www.getfivestars.xyz/api/zapier/campaigns',
-    headers: {
-      'Authorization': `Bearer ${bundle.authData.access_token}`
-    }
-  })
-  
-  // Return the campaigns array directly (already in correct format: [{value, label}])
-  return response.json
-}
-```
-
-**Then update your module.exports** to include `performList`:
-
-```javascript
-module.exports = {
-  // ... your existing exports
-  perform: perform,
-  performList: performList, // This makes campaign_id a dynamic dropdown
-  // ... other exports
-}
-```
-
-**Important**: The `performList` function is automatically called by Zapier when a field has `altersDynamicFields: true`. It should return an array of objects with `value` and `label` properties, which your API already provides.
-
-4. **Save the code**
-5. **Switch back to UI mode** (uncheck "Switch to Code Mode") if you want, or test it in Code Mode
-6. **Test the dropdown** - it should now show your campaigns when you test the action
+1. **Go back to your "Send Review Request" action**
+2. **Go to Input Designer**
+3. **Edit the "Campaign ID" field**
+4. **In the Options section**:
+   - ✅ Check **"Dropdown"** checkbox
+   - ✅ Check **"Alters Dynamic Fields"** (if you want it to affect other fields)
+   - Select **"Dynamic"** as the dropdown type
+5. **In "Dropdown Source"**:
+   - Select the **hidden trigger** you just created ("Campaign List" or "Get Campaigns")
+   - **Value Field**: Select `value` (the campaign_id)
+   - **Label Field**: Select `label` (the campaign name)
+6. **Click "Save"**
 
 ### Step 4: Test the Dynamic Dropdown
 

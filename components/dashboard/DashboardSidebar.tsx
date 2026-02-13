@@ -24,26 +24,24 @@ export function DashboardSidebar() {
   const pathname = usePathname()
 
   return (
-    <aside className="w-56 bg-amber-50 border-r border-amber-200 flex flex-col pt-1">
-      <div className="p-6 pb-4">
+    <aside className="w-64 bg-white border-r border-gray-100 flex flex-col min-h-screen shadow-[1px_0_20px_0_rgba(0,0,0,0.02)] z-10">
+      <div className="p-6 pb-8">
         <Link href="/dashboard" className="flex items-center gap-3">
           <Image
             src="/logo.png"
             alt="FiveStars"
             width={140}
             height={40}
-            className="h-8 w-auto pt-0.5"
+            className="h-8 w-auto"
             priority
           />
-          <h1 className="text-2xl font-bold text-amber-600 pt-0.5">
+          <span className="text-xl font-bold tracking-tight text-slate-900">
             FiveStars
-          </h1>
+          </span>
         </Link>
       </div>
-      <nav className="flex-1 px-3 space-y-0.5">
+      <nav className="flex-1 px-4 space-y-1">
         {navigation.map((item) => {
-          // Fix: Only highlight exact match or if pathname starts with href + '/' (not just href)
-          // This prevents /dashboard from matching /dashboard/campaigns
           const isActive = pathname === item.href || 
             (item.href !== '/dashboard' && pathname?.startsWith(item.href + '/'))
           return (
@@ -51,18 +49,28 @@ export function DashboardSidebar() {
               key={item.name}
               href={item.href}
               className={cn(
-                'flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors',
+                'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group',
                 isActive
-                  ? 'bg-amber-100 text-slate-900 font-medium'
-                  : 'text-slate-700 hover:bg-amber-100/50'
+                  ? 'bg-amber-50 text-amber-900 shadow-sm ring-1 ring-amber-100'
+                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
               )}
             >
-              <item.icon className="h-4 w-4" />
+              <item.icon className={cn("h-4 w-4 transition-colors", isActive ? "text-amber-600" : "text-slate-400 group-hover:text-slate-600")} />
               {item.name}
             </Link>
           )
         })}
       </nav>
+      
+      <div className="p-4 border-t border-gray-100">
+        <div className="bg-slate-50 rounded-lg p-4">
+          <p className="text-xs font-medium text-slate-900 mb-1">Need help?</p>
+          <p className="text-xs text-slate-500 mb-3">Check our documentation or contact support.</p>
+          <Link href="/api/docs" className="text-xs font-medium text-amber-600 hover:text-amber-700 block">
+            View Documentation &rarr;
+          </Link>
+        </div>
+      </div>
     </aside>
   )
 }

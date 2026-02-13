@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
-import { Loader2 } from 'lucide-react'
+import { Loader2, Save, Building2, User, ExternalLink } from 'lucide-react'
 
 export default function SettingsPage() {
   const router = useRouter()
@@ -94,100 +94,122 @@ export default function SettingsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="h-6 w-6 animate-spin text-amber-600" />
+        <Loader2 className="h-8 w-8 animate-spin text-amber-500" />
       </div>
     )
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 animate-fade-in max-w-4xl mx-auto">
       {/* Header Section */}
-      <div>
-        <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Settings</h1>
-        <p className="text-slate-600 mt-2 text-sm">
-          Manage your account and business settings
+      <div className="pb-6 border-b border-gray-100">
+        <h1 className="text-3xl font-bold tracking-tight text-slate-900">Settings</h1>
+        <p className="text-slate-500 mt-2 text-sm max-w-2xl">
+          Manage your account preferences and business profile information.
         </p>
       </div>
 
-      <Card className="border-amber-200 shadow-sm">
-        <CardHeader>
-          <CardTitle className="text-xl text-slate-900">Business Information</CardTitle>
-          <CardDescription className="text-slate-600">
-            Update your business profile details
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <form onSubmit={handleSaveBusinessName} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="businessName" className="text-sm font-semibold text-slate-900">
-                Business Name
-              </Label>
-              <div className="flex items-center gap-3">
-                <Input
-                  id="businessName"
-                  value={businessName}
-                  onChange={(e) => setBusinessName(e.target.value)}
-                  placeholder="Enter your business name"
-                  disabled={saving}
-                  className="flex-1"
-                />
-                <Button
-                  type="submit"
-                  disabled={saving || !businessName.trim() || businessName === business?.business_name}
-                  className="bg-amber-500 hover:bg-amber-600 text-slate-900 font-semibold"
-                >
-                  {saving ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Saving...
-                    </>
-                  ) : (
-                    'Save'
-                  )}
-                </Button>
+      <div className="grid gap-8">
+        <Card className="border-gray-100 shadow-[0_2px_10px_rgba(0,0,0,0.03)] overflow-hidden">
+          <CardHeader className="bg-slate-50/50 border-b border-gray-100 pb-4">
+            <div className="flex items-center gap-2">
+              <div className="h-8 w-8 rounded-lg bg-white shadow-sm border border-gray-100 flex items-center justify-center text-slate-600">
+                <Building2 className="h-4 w-4" />
+              </div>
+              <div>
+                <CardTitle className="text-lg font-semibold tracking-tight text-slate-900">Business Profile</CardTitle>
+                <CardDescription className="text-slate-500 mt-0.5">Your public business information</CardDescription>
               </div>
             </div>
-            {error && (
-              <div className="rounded-md bg-red-50 border border-red-200 p-3">
-                <p className="text-sm text-red-700">{error}</p>
+          </CardHeader>
+          <CardContent className="p-6 space-y-6">
+            <form onSubmit={handleSaveBusinessName} className="space-y-4">
+              <div className="space-y-3">
+                <Label htmlFor="businessName" className="text-slate-700 font-medium">
+                  Business Name
+                </Label>
+                <div className="flex items-center gap-3">
+                  <Input
+                    id="businessName"
+                    value={businessName}
+                    onChange={(e) => setBusinessName(e.target.value)}
+                    placeholder="Enter your business name"
+                    disabled={saving}
+                    className="flex-1 h-10 border-gray-200 focus:border-amber-500 focus:ring-amber-500/20"
+                  />
+                  <Button
+                    type="submit"
+                    disabled={saving || !businessName.trim() || businessName === business?.business_name}
+                    className="bg-amber-500 hover:bg-amber-600 text-white font-medium shadow-sm h-10 px-6"
+                  >
+                    {saving ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Saving...
+                      </>
+                    ) : (
+                      <>
+                        <Save className="mr-2 h-4 w-4" />
+                        Save
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+              {error && (
+                <div className="rounded-lg bg-destructive/5 border border-destructive/20 p-3 text-sm text-destructive">
+                  {error}
+                </div>
+              )}
+            </form>
+
+            {business?.google_profile_url && (
+              <div className="pt-6 border-t border-gray-100">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label className="text-slate-700 font-medium">Google Business Profile</Label>
+                    <p className="text-sm text-slate-500 mt-1">Connected profile URL</p>
+                  </div>
+                  <a
+                    href={business.google_profile_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-sm text-amber-600 hover:text-amber-700 font-medium px-3 py-1.5 rounded-md hover:bg-amber-50 transition-colors"
+                  >
+                    View Profile <ExternalLink className="h-3.5 w-3.5" />
+                  </a>
+                </div>
               </div>
             )}
-          </form>
+          </CardContent>
+        </Card>
 
-          {business?.google_profile_url && (
-            <div className="pt-4 border-t border-amber-100">
-              <Label className="text-sm font-semibold text-slate-900">Google Business Profile</Label>
-              <p className="text-sm text-slate-600 mt-1">
-                <a
-                  href={business.google_profile_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-amber-600 hover:text-amber-700 hover:underline font-medium"
-                >
-                  View Profile →
-                </a>
+        <Card className="border-gray-100 shadow-[0_2px_10px_rgba(0,0,0,0.03)] overflow-hidden">
+          <CardHeader className="bg-slate-50/50 border-b border-gray-100 pb-4">
+            <div className="flex items-center gap-2">
+              <div className="h-8 w-8 rounded-lg bg-white shadow-sm border border-gray-100 flex items-center justify-center text-slate-600">
+                <User className="h-4 w-4" />
+              </div>
+              <div>
+                <CardTitle className="text-lg font-semibold tracking-tight text-slate-900">Account Details</CardTitle>
+                <CardDescription className="text-slate-500 mt-0.5">Your personal account information</CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="p-6">
+            <div className="grid gap-1">
+              <Label className="text-slate-700 font-medium">Email Address</Label>
+              <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-gray-100 mt-2">
+                <span className="text-sm text-slate-600 font-mono">{user?.email}</span>
+                <span className="text-xs text-slate-400 font-medium px-2 py-1 bg-white rounded border border-gray-100">Primary</span>
+              </div>
+              <p className="text-xs text-slate-500 mt-2">
+                Contact support to change your email address.
               </p>
             </div>
-          )}
-        </CardContent>
-      </Card>
-
-      <Card className="border-amber-200 shadow-sm">
-        <CardHeader>
-          <CardTitle className="text-xl text-slate-900">Account</CardTitle>
-          <CardDescription className="text-slate-600">
-            Your account information
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div>
-            <Label className="text-sm font-semibold text-slate-900">Email</Label>
-            <p className="text-sm text-slate-600 mt-1">
-              {user?.email}
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }

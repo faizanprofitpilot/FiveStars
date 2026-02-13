@@ -42,21 +42,24 @@ export default async function CampaignDetailPage({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 animate-fade-in max-w-5xl mx-auto">
       {/* Header Section */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
+      <div className="pb-6 border-b border-gray-100 flex items-start justify-between">
+        <div className="flex items-start gap-4">
           <Link href="/dashboard/campaigns">
-            <Button variant="ghost" size="icon" className="text-slate-600 hover:text-slate-900">
+            <Button variant="outline" size="icon" className="h-9 w-9 border-gray-200 text-slate-500 hover:text-slate-900 hover:bg-slate-50 mt-1">
               <ArrowLeft className="h-4 w-4" />
             </Button>
           </Link>
           <div>
-            <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Campaign Details</h1>
-            <p className="text-slate-600 mt-1 text-sm">
-              Manage your campaign settings and view activity
+            <h1 className="text-3xl font-bold tracking-tight text-slate-900">{campaign.name}</h1>
+            <p className="text-slate-500 mt-1 text-sm">
+              Campaign ID: <span className="font-mono text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded text-xs ml-1">{campaign.campaign_id}</span>
             </p>
           </div>
+        </div>
+        <div className="flex gap-2">
+          {/* Action buttons could go here */}
         </div>
       </div>
 
