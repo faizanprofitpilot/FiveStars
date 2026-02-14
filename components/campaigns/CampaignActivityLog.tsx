@@ -107,12 +107,25 @@ export function CampaignActivityLog({ campaignId }: CampaignActivityLogProps) {
         throw new Error(data.error || 'Failed to delete review request')
       }
 
-      // Remove from local state and refresh
+      // Remove from local state immediately
       setRequests(requests.filter(r => r.id !== requestId))
       setDeleteDialogOpen(null)
+      
+      // Refetch to ensure consistency
+      const refreshResponse = await fetch(`/api/campaigns/${campaignId}/requests`)
+      const refreshData = await refreshResponse.json()
+      if (refreshData.requests) {
+        setRequests(refreshData.requests)
+      }
     } catch (error: any) {
       console.error('Delete error:', error)
       alert(error.message || 'Failed to delete review request')
+      // Refetch on error to restore correct state
+      const refreshResponse = await fetch(`/api/campaigns/${campaignId}/requests`)
+      const refreshData = await refreshResponse.json()
+      if (refreshData.requests) {
+        setRequests(refreshData.requests)
+      }
     } finally {
       setDeleting(false)
     }

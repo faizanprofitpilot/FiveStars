@@ -150,6 +150,17 @@ CREATE POLICY "Users can insert review requests for their campaigns"
     )
   );
 
+CREATE POLICY "Users can delete review requests for their campaigns"
+  ON review_requests FOR DELETE
+  USING (
+    EXISTS (
+      SELECT 1 FROM campaigns
+      JOIN businesses ON businesses.id = campaigns.business_id
+      WHERE campaigns.id = review_requests.campaign_id
+      AND businesses.user_id = auth.uid()
+    )
+  );
+
 -- Review replies policies
 CREATE POLICY "Users can view review replies for their businesses"
   ON review_replies FOR SELECT

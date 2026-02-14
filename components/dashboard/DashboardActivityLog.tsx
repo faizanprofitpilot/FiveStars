@@ -122,12 +122,39 @@ export function DashboardActivityLog({ dateRange }: DashboardActivityLogProps) {
         throw new Error(data.error || 'Failed to delete review request')
       }
 
-      // Remove from local state
+      // Remove from local state immediately
       setRequests(requests.filter(r => r.id !== requestId))
       setDeleteDialogOpen(null)
+      
+      // Refetch to ensure consistency
+      const params = new URLSearchParams()
+      if (dateRange?.from) {
+        params.set('from', dateRange.from.toISOString())
+      }
+      if (dateRange?.to) {
+        params.set('to', dateRange.to.toISOString())
+      }
+      const refreshResponse = await fetch(`/api/dashboard/activity?${params.toString()}`)
+      const refreshData = await refreshResponse.json()
+      if (refreshData.requests) {
+        setRequests(refreshData.requests)
+      }
     } catch (error: any) {
       console.error('Delete error:', error)
       alert(error.message || 'Failed to delete review request')
+      // Refetch on error to restore correct state
+      const params = new URLSearchParams()
+      if (dateRange?.from) {
+        params.set('from', dateRange.from.toISOString())
+      }
+      if (dateRange?.to) {
+        params.set('to', dateRange.to.toISOString())
+      }
+      const refreshResponse = await fetch(`/api/dashboard/activity?${params.toString()}`)
+      const refreshData = await refreshResponse.json()
+      if (refreshData.requests) {
+        setRequests(refreshData.requests)
+      }
     } finally {
       setDeleting(false)
     }
