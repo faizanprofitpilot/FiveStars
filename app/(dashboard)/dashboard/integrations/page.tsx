@@ -1,6 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
 import Script from 'next/script'
-import { createAdminClient } from '@/lib/supabase/admin'
 
 export default async function IntegrationsPage() {
   const supabase = await createClient()
@@ -30,11 +29,11 @@ export default async function IntegrationsPage() {
   }
 
   // Check if user has existing OAuth tokens (connected Zapier account)
-  const adminSupabase = createAdminClient()
-  const { data: existingTokens } = await adminSupabase
+  // CRITICAL: Use createClient() NOT createAdminClient() to respect RLS policies
+  // RLS will automatically filter to only this user's tokens
+  const { data: existingTokens } = await supabase
     .from('oauth_tokens')
     .select('id, created_at, expires_at')
-    .eq('user_id', user.id)
     .eq('client_id', 'zapier')
     .order('created_at', { ascending: false })
     .limit(1)
