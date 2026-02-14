@@ -3,14 +3,19 @@ import { createAdminClient } from '@/lib/supabase/admin'
 /**
  * Internal function to send review request (bypasses auth for Zapier)
  * This is called from the Zapier webhook handler
+ * 
+ * CRITICAL: This function verifies that the campaign belongs to the expected user
+ * to prevent cross-user message sending.
  */
 export async function sendReviewRequestInternal({
   campaignId,
+  expectedUserId,
   firstName,
   phone,
   email,
 }: {
   campaignId: string
+  expectedUserId: string // CRITICAL: Verify campaign belongs to this user
   firstName: string
   phone?: string
   email?: string
@@ -21,8 +26,10 @@ export async function sendReviewRequestInternal({
   error?: string
 }> {
   const sendId = `send_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-  console.log(`[${sendId}] sendReviewRequestInternal called:`, {
+  console.log(`[${sendId}] ========== sendReviewRequestInternal CALLED ==========`)
+  console.log(`[${sendId}] Parameters:`, {
     campaignId,
+    expectedUserId,
     firstName,
     phone: phone ? '***' + phone.slice(-4) : 'none',
     email: email ? email.split('@')[0] + '@***' : 'none',
@@ -47,11 +54,35 @@ export async function sendReviewRequestInternal({
       .single()
 
     if (campaignError || !campaign) {
+      console.error(`[${sendId}] Campaign not found:`, { campaignId, error: campaignError?.message })
       return {
         success: false,
         error: 'Campaign not found',
       }
     }
+
+    // CRITICAL SECURITY CHECK: Verify campaign belongs to expected user
+    const business = Array.isArray(campaign.businesses) ? campaign.businesses[0] : campaign.businesses
+    if (!business || business.user_id !== expectedUserId) {
+      console.error(`[${sendId}] SECURITY ERROR: Campaign ownership mismatch!`, {
+        campaign_id: campaign.id,
+        campaign_business_user_id: business?.user_id,
+        expected_user_id: expectedUserId,
+        business_id: business?.id,
+        business_name: business?.business_name,
+      })
+      return {
+        success: false,
+        error: 'Campaign does not belong to authenticated user',
+      }
+    }
+
+    console.log(`[${sendId}] ✅ Security check passed - campaign belongs to expected user:`, {
+      expected_user_id: expectedUserId,
+      campaign_business_user_id: business.user_id,
+      business_name: business.business_name,
+      business_id: business.id,
+    })
 
     // Import here to avoid circular dependencies
     const { sendSMS, validatePhoneNumber } = await import('@/lib/twilio/send-sms')
@@ -88,21 +119,22 @@ export async function sendReviewRequestInternal({
 
     // Get review link from business settings, fallback to default
     // This is the business for the authenticated user ONLY
-    const reviewLink = campaign.businesses.review_link || `https://g.page/r/YOUR_REVIEW_LINK`
+    const reviewLink = business.review_link || `https://g.page/r/YOUR_REVIEW_LINK`
 
     console.log(`[${sendId}] Campaign and business details:`, {
       campaign_id: campaign.id,
       campaign_name: campaign.name,
-      business_id: campaign.businesses.id,
-      business_name: campaign.businesses.business_name,
-      business_user_id: campaign.businesses.user_id,
+      business_id: business.id,
+      business_name: business.business_name,
+      business_user_id: business.user_id,
+      expected_user_id: expectedUserId,
       review_link: reviewLink,
     })
 
     // Prepare template variables - uses ONLY this user's business data
     const templateVariables = {
       first_name: firstName,
-      business_name: campaign.businesses.business_name, // This user's business name ONLY
+      business_name: business.business_name, // This user's business name ONLY
       review_link: reviewLink, // This user's review link ONLY
     }
 
@@ -226,12 +258,12 @@ export async function sendReviewRequestInternal({
       const htmlBody = createEmailTemplate(
         emailBody,
         templateVariables,
-        campaign.businesses.business_name
+        business.business_name
       )
 
       const emailResult = await sendEmail({
         to: email,
-        subject: `Thanks for choosing ${campaign.businesses.business_name}!`,
+        subject: `Thanks for choosing ${business.business_name}!`,
         html: htmlBody,
       })
 

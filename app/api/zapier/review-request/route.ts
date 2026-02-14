@@ -147,7 +147,15 @@ export async function POST(request: Request) {
       )
     }
 
-    console.log(`[${requestId}] All security checks passed. Proceeding to send message.`)
+    console.log(`[${requestId}] ✅ All security checks passed. Proceeding to send message.`)
+    console.log(`[${requestId}] FINAL VERIFICATION:`, {
+      authenticated_user_id: userId,
+      business_id: userBusiness.id,
+      business_name: userBusiness.business_name,
+      campaign_id: campaign.campaign_id,
+      campaign_uuid: campaign.id,
+      campaign_name: campaign.name,
+    })
 
     // Store contact for tracking (optional - doesn't block sending)
     if (validatedData.phone || validatedData.email) {
@@ -184,6 +192,7 @@ export async function POST(request: Request) {
 
     const result = await sendReviewRequestInternal({
       campaignId: campaign.id, // Use UUID - this campaign belongs to userBusiness.id
+      expectedUserId: userId, // CRITICAL: Pass user_id to verify ownership
       firstName: validatedData.first_name,
       phone: validatedData.phone,
       email: validatedData.email,
