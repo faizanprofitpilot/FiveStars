@@ -1,4 +1,4 @@
-import { createAdminClient } from '@/lib/supabase/admin'
+import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic'
@@ -6,19 +6,32 @@ export const dynamic = 'force-dynamic'
 /**
  * Debug endpoint to test Zapier webhook behavior
  * GET /api/debug/zapier-test
+ * SECURITY: Now requires authentication and only shows current user's data
  */
 export async function GET(request: Request) {
   try {
-    const supabase = createAdminClient()
+    // Require authentication - only show current user's data
+    const supabase = await createClient()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const results: any = {
       timestamp: new Date().toISOString(),
+      user_id: user.id,
+      user_email: user.email,
       checks: {},
     }
 
-    // 1. List ALL businesses
+    // 1. List ONLY current user's businesses
     const { data: allBusinesses, error: businessError } = await supabase
       .from('businesses')
       .select('id, business_name, user_id, created_at')
+      .eq('user_id', user.id) // CRITICAL: Only current user's businesses
       .order('created_at', { ascending: false })
 
     results.checks.allBusinesses = {
@@ -31,7 +44,7 @@ export async function GET(request: Request) {
       error: businessError?.message,
     }
 
-    // 2. List ALL campaigns
+    // 2. List ONLY current user's campaigns
     const { data: allCampaigns, error: campaignError } = await supabase
       .from('campaigns')
       .select(`
@@ -45,6 +58,7 @@ export async function GET(request: Request) {
           user_id
         )
       `)
+      .eq('businesses.user_id', user.id) // CRITICAL: Only current user's campaigns
       .order('created_at', { ascending: false })
 
     results.checks.allCampaigns = {
@@ -95,7 +109,7 @@ export async function GET(request: Request) {
       }
     }
 
-    // 4. Recent review requests
+    // 4. Recent review requests (only current user's)
     const { data: recentRequests, error: requestsError } = await supabase
       .from('review_requests')
       .select(`
@@ -116,6 +130,7 @@ export async function GET(request: Request) {
           )
         )
       `)
+      .eq('campaigns.businesses.user_id', user.id) // CRITICAL: Only current user's requests
       .order('created_at', { ascending: false })
       .limit(20)
 
@@ -178,7 +193,7 @@ export async function GET(request: Request) {
     if (allCampaigns && allCampaigns.length > 0) {
       const testCampaignId = allCampaigns[0].campaign_id
       
-      // Test WITHOUT business_id filter (BAD - what might be happening)
+      // Test WITHOUT business_id filter (for testing purposes - but still filtered by user)
       const { data: campaignsWithoutFilter } = await supabase
         .from('campaigns')
         .select(`
@@ -193,6 +208,7 @@ export async function GET(request: Request) {
           )
         `)
         .eq('campaign_id', testCampaignId)
+        .eq('businesses.user_id', user.id) // CRITICAL: Still filter by current user
 
       // Test WITH business_id filter for each business
       const campaignsWithFilter: any[] = []
