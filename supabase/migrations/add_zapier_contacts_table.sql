@@ -38,21 +38,61 @@ COMMENT ON TABLE zapier_contacts IS 'Stores contacts fetched from Zapier, associ
 ALTER TABLE zapier_contacts ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies: Users can only access their own contacts
-CREATE POLICY "Users can view their own zapier contacts"
-  ON zapier_contacts FOR SELECT
-  USING (auth.uid() = user_id);
+-- All policies are idempotent - they check if they exist first
 
-CREATE POLICY "Users can insert their own zapier contacts"
-  ON zapier_contacts FOR INSERT
-  WITH CHECK (auth.uid() = user_id);
+-- SELECT policy
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies 
+    WHERE tablename = 'zapier_contacts' 
+    AND policyname = 'Users can view their own zapier contacts'
+  ) THEN
+    CREATE POLICY "Users can view their own zapier contacts"
+      ON zapier_contacts FOR SELECT
+      USING (auth.uid() = user_id);
+  END IF;
+END $$;
 
-CREATE POLICY "Users can update their own zapier contacts"
-  ON zapier_contacts FOR UPDATE
-  USING (auth.uid() = user_id)
-  WITH CHECK (auth.uid() = user_id);
+-- INSERT policy
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies 
+    WHERE tablename = 'zapier_contacts' 
+    AND policyname = 'Users can insert their own zapier contacts'
+  ) THEN
+    CREATE POLICY "Users can insert their own zapier contacts"
+      ON zapier_contacts FOR INSERT
+      WITH CHECK (auth.uid() = user_id);
+  END IF;
+END $$;
 
--- Note: DELETE policy not needed as contacts are managed server-side via admin client
--- But we can add it for completeness
-CREATE POLICY "Users can delete their own zapier contacts"
-  ON zapier_contacts FOR DELETE
-  USING (auth.uid() = user_id);
+-- UPDATE policy
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies 
+    WHERE tablename = 'zapier_contacts' 
+    AND policyname = 'Users can update their own zapier contacts'
+  ) THEN
+    CREATE POLICY "Users can update their own zapier contacts"
+      ON zapier_contacts FOR UPDATE
+      USING (auth.uid() = user_id)
+      WITH CHECK (auth.uid() = user_id);
+  END IF;
+END $$;
+
+-- DELETE policy
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies 
+    WHERE tablename = 'zapier_contacts' 
+    AND policyname = 'Users can delete their own zapier contacts'
+  ) THEN
+    CREATE POLICY "Users can delete their own zapier contacts"
+      ON zapier_contacts FOR DELETE
+      USING (auth.uid() = user_id);
+  END IF;
+END $$;
