@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { generateReviewReply } from '@/lib/openai/generate-reply'
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
+import { checkRateLimit, getRateLimitIdentifier } from '@/lib/rate-limit'
 
 const generateReplySchema = z.object({
   review_text: z.string().min(1, 'Review text is required'),
@@ -17,6 +18,27 @@ export async function POST(request: Request) {
 
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // Rate limiting for AI generation (20/hour per user to prevent cost overruns)
+    const identifier = getRateLimitIdentifier(request, user.id)
+    const rateLimit = checkRateLimit(identifier, 'aiGeneration')
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        {
+          error: 'rate_limit_exceeded',
+          error_description: `Rate limit exceeded. Please try again after ${new Date(rateLimit.resetTime).toISOString()}`,
+        },
+        {
+          status: 429,
+          headers: {
+            'X-RateLimit-Limit': '20',
+            'X-RateLimit-Remaining': '0',
+            'X-RateLimit-Reset': rateLimit.resetTime.toString(),
+            'Retry-After': Math.ceil((rateLimit.resetTime - Date.now()) / 1000).toString(),
+          },
+        }
+      )
     }
 
     const body = await request.json()

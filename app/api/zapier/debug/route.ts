@@ -6,8 +6,16 @@ export const dynamic = 'force-dynamic'
 
 /**
  * Debug endpoint to check recent review requests and their status
+ * SECURITY: Disabled in production
  */
 export async function GET(request: Request) {
+  // CRITICAL: Disable debug endpoints in production
+  if (process.env.NODE_ENV === 'production') {
+    return NextResponse.json(
+      { error: 'Not found' },
+      { status: 404 }
+    )
+  }
   try {
     // Authenticate using OAuth token
     const oauthToken = extractOAuthToken(request)

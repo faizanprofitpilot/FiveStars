@@ -7,8 +7,16 @@ export const dynamic = 'force-dynamic'
 /**
  * Test endpoint for Zapier OAuth authentication
  * Returns user info if authenticated successfully
+ * SECURITY: Disabled in production (Zapier uses /api/zapier/campaigns for testing)
  */
 export async function GET(request: Request) {
+  // CRITICAL: Disable debug endpoints in production
+  if (process.env.NODE_ENV === 'production') {
+    return NextResponse.json(
+      { error: 'Not found' },
+      { status: 404 }
+    )
+  }
   try {
     // Authenticate using OAuth token
     const oauthToken = extractOAuthToken(request)

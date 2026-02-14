@@ -6,9 +6,16 @@ export const dynamic = 'force-dynamic'
 /**
  * Debug endpoint to test Zapier webhook behavior
  * GET /api/debug/zapier-test
- * SECURITY: Now requires authentication and only shows current user's data
+ * SECURITY: Disabled in production, requires authentication in development
  */
 export async function GET(request: Request) {
+  // CRITICAL: Disable debug endpoints in production
+  if (process.env.NODE_ENV === 'production') {
+    return NextResponse.json(
+      { error: 'Not found' },
+      { status: 404 }
+    )
+  }
   try {
     // Require authentication - only show current user's data
     const supabase = await createClient()

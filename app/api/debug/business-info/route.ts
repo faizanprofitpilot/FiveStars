@@ -6,8 +6,16 @@ export const dynamic = 'force-dynamic'
 /**
  * Debug endpoint to check what businesses and campaigns exist
  * Access at: /api/debug/business-info
+ * SECURITY: Disabled in production
  */
 export async function GET() {
+  // CRITICAL: Disable debug endpoints in production
+  if (process.env.NODE_ENV === 'production') {
+    return NextResponse.json(
+      { error: 'Not found' },
+      { status: 404 }
+    )
+  }
   try {
     const supabase = await createClient()
     const {

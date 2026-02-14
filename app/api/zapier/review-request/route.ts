@@ -3,6 +3,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { sendReviewRequestInternal } from '@/lib/zapier/send-review-request'
 import { authenticateOAuthToken, extractOAuthToken } from '@/lib/oauth/auth'
 import { z } from 'zod'
+import { checkRateLimit, getRateLimitIdentifier } from '@/lib/rate-limit'
 
 export const dynamic = 'force-dynamic'
 
@@ -44,6 +45,29 @@ export async function POST(request: Request) {
     }
 
     console.log(`[${requestId}] Authenticated user ID: ${userId}`)
+
+    // Rate limiting for Zapier webhook (1000/minute per user - Zapier can be high volume)
+    const identifier = getRateLimitIdentifier(request, userId)
+    const rateLimit = checkRateLimit(identifier, 'zapier')
+    if (!rateLimit.allowed) {
+      console.warn(`[${requestId}] Rate limit exceeded for user ${userId}`)
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'rate_limit_exceeded',
+          error_description: `Rate limit exceeded. Please try again after ${new Date(rateLimit.resetTime).toISOString()}`,
+        },
+        {
+          status: 429,
+          headers: {
+            'X-RateLimit-Limit': '1000',
+            'X-RateLimit-Remaining': '0',
+            'X-RateLimit-Reset': rateLimit.resetTime.toString(),
+            'Retry-After': Math.ceil((rateLimit.resetTime - Date.now()) / 1000).toString(),
+          },
+        }
+      )
+    }
 
     const body = await request.json()
     const validatedData = zapierSchema.parse(body)

@@ -4,6 +4,7 @@ import { sendEmail, createEmailTemplate, validateEmail } from '@/lib/resend/send
 import { replaceTemplateVariables } from '@/lib/template'
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
+import { checkRateLimit, getRateLimitIdentifier } from '@/lib/rate-limit'
 
 const sendRequestSchema = z.object({
   campaign_id: z.string().uuid(),
@@ -21,6 +22,27 @@ export async function POST(request: Request) {
 
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // Rate limiting for review requests (100/hour per user)
+    const identifier = getRateLimitIdentifier(request, user.id)
+    const rateLimit = checkRateLimit(identifier, 'reviewRequest')
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        {
+          error: 'rate_limit_exceeded',
+          error_description: `Rate limit exceeded. Please try again after ${new Date(rateLimit.resetTime).toISOString()}`,
+        },
+        {
+          status: 429,
+          headers: {
+            'X-RateLimit-Limit': '100',
+            'X-RateLimit-Remaining': '0',
+            'X-RateLimit-Reset': rateLimit.resetTime.toString(),
+            'Retry-After': Math.ceil((rateLimit.resetTime - Date.now()) / 1000).toString(),
+          },
+        }
+      )
     }
 
     const body = await request.json()

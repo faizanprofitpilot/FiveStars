@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createOAuthTokens, refreshAccessToken } from '@/lib/oauth/auth'
 import { isTokenExpired } from '@/lib/oauth/tokens'
+import { checkRateLimit, getRateLimitIdentifier } from '@/lib/rate-limit'
+import { isRedirectUriAllowed } from '@/lib/oauth/redirect-uris'
 
 export const dynamic = 'force-dynamic'
 
@@ -32,6 +34,38 @@ export async function POST(request: Request) {
             error_description: 'Missing required parameters: code, redirect_uri',
           },
           { status: 400 }
+        )
+      }
+
+      // CRITICAL: Validate redirect URI against allowlist
+      if (!isRedirectUriAllowed(redirectUri)) {
+        return NextResponse.json(
+          {
+            error: 'invalid_request',
+            error_description: 'Invalid redirect_uri. Redirect URI is not allowed.',
+          },
+          { status: 400 }
+        )
+      }
+
+      // Rate limiting for OAuth endpoints
+      const identifier = getRateLimitIdentifier(request)
+      const rateLimit = checkRateLimit(identifier, 'oauth')
+      if (!rateLimit.allowed) {
+        return NextResponse.json(
+          {
+            error: 'rate_limit_exceeded',
+            error_description: `Rate limit exceeded. Please try again after ${new Date(rateLimit.resetTime).toISOString()}`,
+          },
+          {
+            status: 429,
+            headers: {
+              'X-RateLimit-Limit': '10',
+              'X-RateLimit-Remaining': '0',
+              'X-RateLimit-Reset': rateLimit.resetTime.toString(),
+              'Retry-After': Math.ceil((rateLimit.resetTime - Date.now()) / 1000).toString(),
+            },
+          }
         )
       }
 
@@ -108,6 +142,27 @@ export async function POST(request: Request) {
             error_description: 'Missing required parameter: refresh_token',
           },
           { status: 400 }
+        )
+      }
+
+      // Rate limiting for OAuth endpoints
+      const identifier = getRateLimitIdentifier(request)
+      const rateLimit = checkRateLimit(identifier, 'oauth')
+      if (!rateLimit.allowed) {
+        return NextResponse.json(
+          {
+            error: 'rate_limit_exceeded',
+            error_description: `Rate limit exceeded. Please try again after ${new Date(rateLimit.resetTime).toISOString()}`,
+          },
+          {
+            status: 429,
+            headers: {
+              'X-RateLimit-Limit': '10',
+              'X-RateLimit-Remaining': '0',
+              'X-RateLimit-Reset': rateLimit.resetTime.toString(),
+              'Retry-After': Math.ceil((rateLimit.resetTime - Date.now()) / 1000).toString(),
+            },
+          }
         )
       }
 
