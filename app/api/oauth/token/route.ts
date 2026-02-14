@@ -60,7 +60,7 @@ export async function POST(request: Request) {
           {
             status: 429,
             headers: {
-              'X-RateLimit-Limit': '10',
+              'X-RateLimit-Limit': '20',
               'X-RateLimit-Remaining': '0',
               'X-RateLimit-Reset': rateLimit.resetTime.toString(),
               'Retry-After': Math.ceil((rateLimit.resetTime - Date.now()) / 1000).toString(),
@@ -157,7 +157,7 @@ export async function POST(request: Request) {
           {
             status: 429,
             headers: {
-              'X-RateLimit-Limit': '10',
+              'X-RateLimit-Limit': '20',
               'X-RateLimit-Remaining': '0',
               'X-RateLimit-Reset': rateLimit.resetTime.toString(),
               'Retry-After': Math.ceil((rateLimit.resetTime - Date.now()) / 1000).toString(),

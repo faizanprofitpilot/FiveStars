@@ -24,7 +24,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Rate limiting for review requests (100/hour per user)
+    // Rate limiting for review requests (1000/hour per user - supports high-volume automation)
     const identifier = getRateLimitIdentifier(request, user.id)
     const rateLimit = checkRateLimit(identifier, 'reviewRequest')
     if (!rateLimit.allowed) {
@@ -36,7 +36,7 @@ export async function POST(request: Request) {
         {
           status: 429,
           headers: {
-            'X-RateLimit-Limit': '100',
+            'X-RateLimit-Limit': '1000',
             'X-RateLimit-Remaining': '0',
             'X-RateLimit-Reset': rateLimit.resetTime.toString(),
             'Retry-After': Math.ceil((rateLimit.resetTime - Date.now()) / 1000).toString(),

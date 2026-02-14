@@ -14,13 +14,14 @@ const store: RateLimitStore = {}
 
 /**
  * Rate limit configuration per endpoint type
+ * Limits are set high to support 10,000+ users with automatic review requests
  */
 export const RATE_LIMITS = {
-  oauth: { requests: 10, windowMs: 60 * 1000 }, // 10 requests per minute
-  reviewRequest: { requests: 100, windowMs: 60 * 60 * 1000 }, // 100 requests per hour
-  aiGeneration: { requests: 20, windowMs: 60 * 60 * 1000 }, // 20 requests per hour
-  general: { requests: 100, windowMs: 60 * 1000 }, // 100 requests per minute
-  zapier: { requests: 1000, windowMs: 60 * 1000 }, // 1000 requests per minute (Zapier can be high volume)
+  oauth: { requests: 20, windowMs: 60 * 1000 }, // 20 requests per minute (auth flows)
+  reviewRequest: { requests: 1000, windowMs: 60 * 60 * 1000 }, // 1000 requests per hour per user
+  aiGeneration: { requests: 100, windowMs: 60 * 60 * 1000 }, // 100 requests per hour (prevents cost overruns)
+  general: { requests: 500, windowMs: 60 * 1000 }, // 500 requests per minute
+  zapier: { requests: 10000, windowMs: 60 * 1000 }, // 10,000 requests per minute per user (supports high-volume automation)
 } as const
 
 export type RateLimitType = keyof typeof RATE_LIMITS

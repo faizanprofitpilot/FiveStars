@@ -46,7 +46,7 @@ export async function POST(request: Request) {
 
     console.log(`[${requestId}] Authenticated user ID: ${userId}`)
 
-    // Rate limiting for Zapier webhook (1000/minute per user - Zapier can be high volume)
+    // Rate limiting for Zapier webhook (10,000/minute per user - supports 10,000+ users with automation)
     const identifier = getRateLimitIdentifier(request, userId)
     const rateLimit = checkRateLimit(identifier, 'zapier')
     if (!rateLimit.allowed) {
@@ -60,7 +60,7 @@ export async function POST(request: Request) {
         {
           status: 429,
           headers: {
-            'X-RateLimit-Limit': '1000',
+            'X-RateLimit-Limit': '10000',
             'X-RateLimit-Remaining': '0',
             'X-RateLimit-Reset': rateLimit.resetTime.toString(),
             'Retry-After': Math.ceil((rateLimit.resetTime - Date.now()) / 1000).toString(),

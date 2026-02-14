@@ -36,7 +36,7 @@ export async function POST(request: Request) {
         {
           status: 429,
           headers: {
-            'X-RateLimit-Limit': '100',
+            'X-RateLimit-Limit': '500',
             'X-RateLimit-Remaining': '0',
             'X-RateLimit-Reset': rateLimit.resetTime.toString(),
             'Retry-After': Math.ceil((rateLimit.resetTime - Date.now()) / 1000).toString(),
