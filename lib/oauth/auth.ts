@@ -90,10 +90,11 @@ export async function createOAuthTokens(
 
 /**
  * Refresh an access token using a refresh token
+ * Returns new access_token + same refresh_token (for Zapier/OAuth client compatibility)
  */
 export async function refreshAccessToken(
   refreshToken: string
-): Promise<{ accessToken: string; expiresAt: Date } | null> {
+): Promise<{ accessToken: string; refreshToken: string; expiresAt: Date } | null> {
   try {
     const supabase = createAdminClient()
 
@@ -112,7 +113,7 @@ export async function refreshAccessToken(
     const accessToken = generateAccessToken()
     const expiresAt = getTokenExpiration(3600) // 1 hour
 
-    // Update the token record
+    // Update the token record (refresh_token stays the same - no rotation)
     const { error: updateError } = await supabase
       .from('oauth_tokens')
       .update({
@@ -125,7 +126,7 @@ export async function refreshAccessToken(
       throw new Error(`Failed to refresh token: ${updateError.message}`)
     }
 
-    return { accessToken, expiresAt }
+    return { accessToken, refreshToken, expiresAt }
   } catch (error) {
     console.error('Token refresh error:', error)
     return null

@@ -178,10 +178,12 @@ export async function POST(request: Request) {
         )
       }
 
+      // Include refresh_token for Zapier/OAuth client compatibility (same token, no rotation)
       return NextResponse.json({
         access_token: result.accessToken,
         token_type: 'Bearer',
         expires_in: 3600,
+        refresh_token: result.refreshToken,
         scope: 'read write',
       })
     }
