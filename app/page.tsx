@@ -153,25 +153,19 @@ export default function LandingPage() {
           </div>
         </AnimatedSection>
 
-        {/* Hero Screenshot Mockup - Only Illustration */}
+        {/* Hero Screenshot - Dashboard Illustration */}
         <AnimatedSection animation="scale-in" delay={300}>
           <div className="mt-16 mb-8">
             <div className="relative max-w-5xl mx-auto">
-              <div className="rounded-xl shadow-2xl border border-amber-200 bg-gradient-to-br from-amber-100 to-amber-50 p-2 hover:shadow-amber-500/20 transition-shadow">
-                <div className="bg-white rounded-lg overflow-hidden">
-                  <div className="bg-slate-100 px-4 py-3 flex items-center gap-2 border-b">
-                    <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                    <div className="w-3 h-3 rounded-full bg-amber-500 animate-pulse"></div>
-                    <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                    <div className="flex-1"></div>
-                  </div>
-                  <div className="aspect-video bg-gradient-to-br from-amber-50 to-yellow-50 flex items-center justify-center">
-                    <div className="text-center">
-                      <BarChart3 className="h-24 w-24 mx-auto text-amber-600 opacity-30 mb-4 animate-float" />
-                      <p className="text-sm text-slate-600 font-medium">Dashboard Preview</p>
-                    </div>
-                  </div>
-                </div>
+              <div className="rounded-xl shadow-2xl border border-amber-200 overflow-hidden hover:shadow-amber-500/20 transition-shadow">
+                <Image
+                  src="/hero-dashboard.png"
+                  alt="FiveStars dashboard - overview of review automation and campaign metrics"
+                  width={1200}
+                  height={720}
+                  className="w-full h-auto"
+                  priority
+                />
               </div>
             </div>
           </div>
