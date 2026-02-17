@@ -157,16 +157,14 @@ export default function LandingPage() {
         <AnimatedSection animation="scale-in" delay={300}>
           <div className="mt-16 mb-8">
             <div className="relative max-w-5xl mx-auto">
-              <div className="rounded-xl shadow-2xl border border-amber-200 overflow-hidden hover:shadow-amber-500/20 transition-shadow">
-                <Image
-                  src="/hero-dashboard.png"
-                  alt="FiveStars dashboard - overview of review automation and campaign metrics"
-                  width={1200}
-                  height={720}
-                  className="w-full h-auto"
-                  priority
-                />
-              </div>
+              <Image
+                src="/hero-dashboard.png"
+                alt="FiveStars dashboard - overview of review automation and campaign metrics"
+                width={1200}
+                height={720}
+                className="w-full h-auto"
+                priority
+              />
             </div>
           </div>
         </AnimatedSection>
