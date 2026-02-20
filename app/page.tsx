@@ -137,7 +137,11 @@ export default function LandingPage() {
                       Start Free Trial
                     </Button>
                   </Link>
-                  <Link href="#demo">
+                  <a
+                    href="https://www.loom.com/share/64d61b550e834eb8a7cf1c719dec2f9f"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     <Button
                       size="lg"
                       variant="outline"
@@ -146,7 +150,7 @@ export default function LandingPage() {
                       <Play className="mr-2 h-5 w-5" />
                       Watch Demo
                     </Button>
-                  </Link>
+                  </a>
                 </>
               )}
             </div>
