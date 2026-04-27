@@ -117,7 +117,19 @@ export default async function IntegrationsPage() {
         )}
       </div>
 
-      <div className="mb-6">
+      <div className="min-h-[600px]">
+        <zapier-workflow
+          sign-up-email={email}
+          sign-up-first-name={firstName || ''}
+          sign-up-last-name={lastName || ''}
+          client-id="lXzMag97Ld8abTu8pXusknAywkqdo1nFzW3Ftw51"
+          theme="light"
+          intro-copy-display="show"
+          guess-zap-display="show"
+        />
+      </div>
+
+      <div className="mt-6">
         <div className="flex items-end justify-between gap-4 mb-3">
           <div>
             <p className="text-sm font-semibold text-gray-900">Popular templates</p>
@@ -149,18 +161,6 @@ export default async function IntegrationsPage() {
             </Card>
           ))}
         </div>
-      </div>
-
-      <div className="min-h-[600px]">
-        <zapier-workflow
-          sign-up-email={email}
-          sign-up-first-name={firstName || ''}
-          sign-up-last-name={lastName || ''}
-          client-id="lXzMag97Ld8abTu8pXusknAywkqdo1nFzW3Ftw51"
-          theme="light"
-          intro-copy-display="show"
-          guess-zap-display="show"
-        />
       </div>
     </div>
   )
