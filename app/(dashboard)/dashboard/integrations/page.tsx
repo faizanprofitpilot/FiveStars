@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import Script from 'next/script'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -97,6 +98,13 @@ export default async function IntegrationsPage() {
 
   return (
     <div className="animate-fade-in w-full">
+      <Script 
+        type="module" 
+        src="https://cdn.zapier.com/packages/partner-sdk/v0/zapier-elements/zapier-elements.esm.js"
+        strategy="lazyOnload"
+      />
+      <link rel="stylesheet" href="https://cdn.zapier.com/packages/partner-sdk/v0/zapier-elements/zapier-elements.css"/>
+
       {/* User context info - ensures each user sees their own connection */}
       <div className="mb-4 rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm text-gray-600">
         <p className="font-medium text-gray-900 mb-1">Your Zapier Connection</p>
@@ -143,33 +151,17 @@ export default async function IntegrationsPage() {
         </div>
       </div>
 
-      <Card className="border-gray-200">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-sm">Build your own workflow</CardTitle>
-        </CardHeader>
-        <CardContent className="pt-0">
-          <div className="rounded-md border border-gray-200 overflow-hidden bg-white">
-            <iframe
-              title="Zapier Embed - Create Workflow"
-              src="https://api.zapier.com/v1/embed/fivestars/create"
-              className="w-full"
-              style={{ height: 720 }}
-              referrerPolicy="no-referrer"
-              allow="clipboard-read; clipboard-write"
-            />
-          </div>
-          <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
-            <p className="text-xs text-gray-600">
-              Prefer a new tab? Open the editor directly.
-            </p>
-            <Link href="https://api.zapier.com/v1/embed/fivestars/create" target="_blank" rel="noreferrer">
-              <Button variant="outline" size="sm">
-                Open editor
-              </Button>
-            </Link>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="min-h-[600px]">
+        <zapier-workflow
+          sign-up-email={email}
+          sign-up-first-name={firstName || ''}
+          sign-up-last-name={lastName || ''}
+          client-id="lXzMag97Ld8abTu8pXusknAywkqdo1nFzW3Ftw51"
+          theme="light"
+          intro-copy-display="show"
+          guess-zap-display="show"
+        />
+      </div>
     </div>
   )
 }
