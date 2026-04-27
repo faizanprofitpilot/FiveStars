@@ -80,6 +80,7 @@ export async function POST(request: Request) {
         .insert({
           user_id: user.id,
           ...businessData,
+          trial_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
         })
         .select()
         .single()

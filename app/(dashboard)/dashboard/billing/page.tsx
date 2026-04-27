@@ -10,7 +10,11 @@ function isActiveStatus(status?: string | null) {
   return status === 'active' || status === 'trialing'
 }
 
-export default async function BillingPage() {
+export default async function BillingPage({
+  searchParams,
+}: {
+  searchParams?: { [key: string]: string | string[] | undefined }
+}) {
   const supabase = await createClient()
   const {
     data: { user },
@@ -33,6 +37,7 @@ export default async function BillingPage() {
 
   const planName = active ? 'Pro' : 'Free'
   const statusText = sub?.status ? sub.status.replace('_', ' ') : 'none'
+  const expired = searchParams?.expired === '1'
 
   return (
     <div className="space-y-8 animate-fade-in max-w-4xl mx-auto">
@@ -58,6 +63,15 @@ export default async function BillingPage() {
           </div>
         </CardHeader>
         <CardContent className="p-6 space-y-6">
+          {expired && !active && (
+            <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+              <p className="font-semibold">Upgrade to continue</p>
+              <p className="text-amber-800 mt-1">
+                Your 7-day free trial has ended. Upgrade to Pro to regain access to your dashboard.
+              </p>
+            </div>
+          )}
+
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="rounded-lg border border-gray-100 bg-white p-4">
               <p className="text-xs text-slate-500">Status</p>
