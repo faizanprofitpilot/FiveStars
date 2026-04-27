@@ -20,6 +20,7 @@ import {
   Megaphone,
   MessageSquare,
   Plug,
+  CreditCard,
   Settings,
   User,
   LogOut,
@@ -32,6 +33,7 @@ const navigation = [
   { name: 'Campaigns', href: '/dashboard/campaigns', icon: Megaphone },
   { name: 'Reply to Reviews', href: '/dashboard/reply-to-reviews', icon: MessageSquare },
   { name: 'Integrations', href: '/dashboard/integrations', icon: Plug },
+  { name: 'Billing', href: '/dashboard/billing', icon: CreditCard },
   { name: 'Settings', href: '/dashboard/settings', icon: Settings },
 ]
 
